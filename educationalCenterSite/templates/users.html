@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<table>
+    <tr><th>Номер</th><th>Имя</th><th>Пароль</th><th>Администратор</th></tr>
+    {% for user in allUsers %}
+        <tr><th>{{user.0}}</th><th>{{user.1}}</th><th>{{user.2}}</th>
+            <th>{% if user.3 == 1 %}<input type="checkbox" checked />{% else %}<input type="checkbox" />{% endif %}</th></tr>
+    {% endfor %}
+</table>
+</main>
+</body>
+</html>
