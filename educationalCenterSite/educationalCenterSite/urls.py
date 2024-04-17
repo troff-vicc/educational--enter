@@ -25,5 +25,6 @@ urlpatterns = [
     path('protocols/', views.information, name='protocols'),
     path('reporting/', views.information, name='reporting'),
     path('information/users', views.users, name='users'),
+    path('login/', views.login, name='login'),
     path('api/', include('api.urls')),
 ]

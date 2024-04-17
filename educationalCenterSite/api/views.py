@@ -12,3 +12,5 @@ class UserAdminViews(APIView):
             cursor.execute('UPDATE users SET admin = ? WHERE id = ?', (serializer.validated_data['checkAdmin'], serializer.validated_data['idUsers']))
             conn.commit()
             return Response('accepted', status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
