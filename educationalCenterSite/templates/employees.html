@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<button onclick="add()"></button>
+<table>
+    <tr><th>Номер</th><th>ФИО</th><th>Должность</th></tr>
+    {% for user in allEmployees %}
+        <tr id="{{user.0}}">
+            <th class="id" name="{{user.0}}">{{user.0}}</th>
+            <th contenteditable="true" class="fullName" name="{{user.0}}">{{user.1}}</th>
+            <th contenteditable="true" class="position" name="{{user.0}}">{{user.2}}</th>
+        </tr>
+    {% endfor %}
+</table>
+    <button onclick="postDate()">Выгрузить</button>
+</main>
+</body>
+<script src="{% static 'js/employees.js' %}"></script>
+</html>

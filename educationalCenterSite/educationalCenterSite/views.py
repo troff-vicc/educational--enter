@@ -39,3 +39,10 @@ def login(request):
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form, 'out': out})
+
+def employees(request):
+    import sqlite3
+    con = sqlite3.connect('educationalDate.db')
+    cur = con.cursor()
+    allEmployees = cur.execute('SELECT * FROM employees').fetchall()
+    return render(request, 'employees.html', {'allEmployees': allEmployees})
