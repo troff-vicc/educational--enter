@@ -13,19 +13,17 @@
     <a href="{% url 'reporting' %}">Отчетность</a>
 </header>
 <main>
-<button onclick="add()"></button>
+<form action="{% url 'add' %}"><input type=hidden name=id-form value=0><button>Добавить</button></form>
 <table>
     <tr><th>Номер</th><th>ФИО</th><th>Должность</th></tr>
     {% for user in allEmployees %}
-        <tr id="{{user.0}}">
+        <tr id="{{user.0}}" onclick="window.location.href = `{% url 'edit' %}?id-form=0&id-row={{user.0}}`">
             <th class="id" name="{{user.0}}">{{user.0}}</th>
-            <th contenteditable="true" class="fullName" name="{{user.0}}">{{user.1}}</th>
-            <th contenteditable="true" class="position" name="{{user.0}}">{{user.2}}</th>
+            <th class="fullName" name="{{user.0}}">{{user.1}}</th>
+            <th class="position" name="{{user.0}}">{{user.2}}</th>
         </tr>
     {% endfor %}
 </table>
-    <button onclick="postDate()">Выгрузить</button>
 </main>
 </body>
-<script src="{% static 'js/employees.js' %}"></script>
 </html>

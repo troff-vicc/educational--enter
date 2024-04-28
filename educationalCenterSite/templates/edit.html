@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление</title>
+</head>
+<body>
+<form method="post" id="inputForm" novalidate>
+    {% csrf_token %}
+    {{ form }}
+  <input type="submit" id="button" value="Сохранить">
+</form>
+</body>
+</html>

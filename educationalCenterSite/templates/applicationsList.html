@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Пользователи</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<form action="{% url 'add' %}"><input type=hidden name=id-form value=4><button>Добавить</button></form>
+<table>
+    <tr><th>Номер</th><th>ФИО</th><th>Дата</th><th>Статус</th><th>Постоплата</th><th>Признак оплаты</th><th>Число обучаемых</th><th>Автор</th></tr>
+    {% for application in allApplications %}
+        <tr id="{{application.0}}" onclick="window.location.href = `{% url 'applicationsListClients' %}?idApplication={{application.0}}`">
+            <th class="id" name="{{application.0}}">{{application.0}}</th>
+            <th class="fullName" name="{{application.0}}">{{application.2}}</th>
+            <th class="position" name="{{application.0}}">{{application.3}}</th>
+            <th class="fullName" name="{{application.0}}">{{application.4}}</th>
+            <th class="position" name="{{application.0}}">{{application.5}}</th>
+            <th class="fullName" name="{{application.0}}">{{application.6}}</th>
+            <th class="position" name="{{application.0}}">{{application.7}}</th>
+            <th class="fullName" name="{{application.0}}">{{application.8}}</th>
+        </tr>
+    {% endfor %}
+</table>
+</main>
+</body>
+<style>
+    tr,th{
+        border: 1px solid black;
+    }
+    table{
+        border-collapse: collapse;
+    }
+</style>
+</html>

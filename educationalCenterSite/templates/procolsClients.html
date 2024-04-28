@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Добавление</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<!--<form action=""><input type=hidden name=id value={{allApplications.0}}><button>Счёт</button></form>-->
+<a href="{% url 'installAccount' allProtocols.0 %}" download="1">Счёт</a>
+<form method="post" id="inputForm" novalidate>
+    {% csrf_token %}
+    {{ form }}
+    <p>Номер: {{allProtocols.0}}</p>
+    <p>Дата: {{allProtocols.1}}</p>
+    <p>Автор: {{allProtocols.3}}</p>
+    <p>Количество обучаемых: {{allProtocols.2}}</p>
+    <table>
+    <tr><th>Имя</th><th>Клиент</th><th>Снилс</th><th>Результат</th></tr>
+    {% for formC in formsClients %}
+        <tr>
+            <th>{{formC.fullName}}</th>
+            <th>{{formC.idClients}}</th>
+            <th>{{formC.snils}}</th>
+            <th>{{formC.result}}</th>
+        </tr>
+    {% endfor %}
+    </table>
+    <input type=hidden name=action id="action" value="0">
+    <br>
+    <input type="submit" id="button" value="Сохранить">
+    <input type="submit" id="add" value="Добавить" onclick="addFunc();">
+</form>
+</body>
+<style>
+    tr,th{
+        border: 1px solid black;
+    }
+    table{
+        select{
+            border:none;
+        }
+        input{
+            border:none;
+        }
+        border-collapse: collapse;
+    }
+</style>
+<script>
+    function addFunc() {
+        const action = document.getElementById("action")
+        action.value = "1"
+    }
+</script>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Клиенты</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<form action="{% url 'add' %}"><input type=hidden name=id-form value=2><button>Добавить</button></form>
+<table>
+    <tr ><th>Номер</th><th>Имя</th><th>ИНН</th><th>КПП</th><th>Адрес</th></tr>
+    {% for client in allClients %}
+        <tr id="{{client.0}}" onclick="window.location.href = `{% url 'edit' %}?id-form=2&id-row={{client.0}}`">
+            <th class="id" name="{{client.0}}">{{client.0}}</th>
+            <th class="name" name="{{client.0}}">{{client.1}}</th>
+            <th class="inn" name="{{client.0}}">{{client.2}}</th>
+            <th class="kpp" name="{{client.0}}">{{client.3}}</th>
+            <th class="address" name="{{client.0}}">{{client.4}}</th>
+        </tr>
+    {% endfor %}
+</table>
+</main>
+</body>
+</html>

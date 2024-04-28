@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Программы обучения</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<form action="{% url 'add' %}"><input type=hidden name=id-form value=3><button>Добавить</button></form>
+<table>
+    <tr>
+        <th>Номер</th>
+        <th>Имя</th>
+        <th>Префикс</th>
+        <th>Признак выгрузки</th>
+        <th>Группа отчётов</th>
+        <th>Текст для протокола</th>
+        <th>Цена по умолчанию</th>
+        <th>ФИО</th>
+        <th>Клиент</th>
+        <th>СНИЛС</th>
+        <th>Номер реестра</th>
+        <th>Результат проведения</th>
+        <th>Подпись</th>
+        <th>Результат</th>
+    </tr>
+    {% for studyingProgram in allStudyingProgram %}
+        <tr id="{{studyingProgram.0}}" onclick="window.location.href = `{% url 'edit' %}?id-form=3&id-row={{studyingProgram.0}}`">
+            <th class="id" name="{{studyingProgram.0}}">{{studyingProgram.0}}</th>
+            <th class="name" name="{{groupReports.0}}">{{studyingProgram.1}}</th>
+            <th class="prefix" name="{{groupReports.0}}">{{studyingProgram.2}}</th>
+            <th class="landing" name="{{groupReports.0}}">{{studyingProgram.3}}</th>
+            <th class="nameGroupReports" name="{{groupReports.0}}">{{studyingProgram.5}}</th>
+            <th class="textForReports" name="{{groupReports.0}}">{{studyingProgram.6}}</th>
+            <th class="price" name="{{groupReports.0}}">{{studyingProgram.7}}</th>
+            <th class="fullName" name="{{groupReports.0}}">{{studyingProgram.8}}</th>
+            <th class="client" name="{{groupReports.0}}">{{studyingProgram.9}}</th>
+            <th class="snils" name="{{groupReports.0}}">{{studyingProgram.10}}</th>
+            <th class="registerNumber" name="{{groupReports.0}}">{{studyingProgram.11}}</th>
+            <th class="resultOf" name="{{groupReports.0}}">{{studyingProgram.12}}</th>
+            <th class="signature" name="{{groupReports.0}}">{{studyingProgram.13}}</th>
+            <th class="result" name="{{groupReports.0}}">{{studyingProgram.14}}</th>
+        </tr>
+    {% endfor %}
+</table>
+</main>
+</body>
+</html>

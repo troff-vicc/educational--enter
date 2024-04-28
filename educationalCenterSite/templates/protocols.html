@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Клиенты</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<form action="{% url 'add' %}"><input type=hidden name=id-form value=5><button>Добавить</button></form>
+<table>
+    <tr><th>Номер</th><th>Имя програмы</th><th>Дата</th><th>Количество обучаемых</th><th>Автор</th></tr>
+    {% for protocol in allProtocols %}
+        <tr id="{{protocol.0}}" onclick="window.location.href = `{% url 'protocolsClient' %}?id={{protocol.0}}`">
+            <th class="id" name="{{protocol.0}}">{{protocol.0}}</th>
+            <th class="nameStudyingProgram" name="{{protocol.0}}">{{protocol.2}}</th>
+            <th class="date" name="{{protocol.0}}">{{protocol.3}}</th>
+            <th class="countTrainee" name="{{protocol.0}}">{{protocol.4}}</th>
+            <th class="user" name="{{protocol.0}}">{{protocol.5}}</th>
+        </tr>
+    {% endfor %}
+</table>
+</main>
+</body>
+<style>
+    tr,th{
+        border: 1px solid black;
+    }
+    table{
+        border-collapse: collapse;
+    }
+</style>
+</html>

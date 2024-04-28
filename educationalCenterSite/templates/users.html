@@ -13,17 +13,16 @@
     <a href="{% url 'reporting' %}">Отчетность</a>
 </header>
 <main>
-<table>
-    <tr><th>Номер</th><th>Имя</th><th>Пароль</th><th>Администратор</th></tr>
-    {% for user in allUsers %}
-        <tr><th>{{user.0}}</th><th>{{user.1}}</th><th>{{user.2}}</th>
-            <th>{% if user.3 == 1 %}
-                <input type="checkbox" checked class="checkbox" id="{{user.0}}" onclick="checkCheckbox(this)"/>
-                {% else %}
-                <input type="checkbox" class="checkbox" id="{{user.0}}" onclick="checkCheckbox(this)"/>
-                {% endif %}</th></tr>
-    {% endfor %}
-</table>
+<form method="post" id="inputForm" novalidate>
+    {% csrf_token %}
+    <table>
+        <tr><th>Номер</th><th>Имя</th><th>Пароль</th><th>Администратор</th></tr>
+        {% for user in allUsers %}
+            <tr><th>{{user.0}}</th><th>{{user.1}}</th><th>{{user.2}}</th><th>{{user.3}}</th></tr>
+        {% endfor %}
+    </table>
+    <input type="submit" id="button" value="Сохранить">
+</form>
 </main>
 </body>
 <script src="{% static 'js/users.js' %}"></script>

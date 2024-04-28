@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Группы репостов</title>
+</head>
+<body>
+<header>
+    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
+    <a href="{% url 'applications' %}">Заявки</a>
+    <a href="{% url 'protocols' %}">Протоколы</a>
+    <a href="{% url 'reporting' %}">Отчетность</a>
+</header>
+<main>
+<form action="{% url 'add' %}"><input type=hidden name=id-form value=1><button>Добавить</button></form>
+<table>
+    <tr><th>Номер</th><th>Имя Группы</th></tr>
+    {% for groupReports in allGroupReports %}
+        <tr id="{{groupReports.0}}" onclick="window.location.href = `{% url 'edit' %}?id-form=1&id-row={{groupReports.0}}`">
+            <th class="id" name="{{groupReports.0}}">{{groupReports.0}}</th>
+            <th class="name" name="{{groupReports.0}}">{{groupReports.1}}</th>
+        </tr>
+    {% endfor %}
+</table>
+</main>
+</body>
+</html>
