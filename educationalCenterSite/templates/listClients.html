@@ -9,18 +9,21 @@
     <a href="{% url 'referenceInformation' %}">Справочная информация</a>
     <a href="{% url 'applications' %}">Заявки</a>
     <a href="{% url 'protocols' %}">Протоколы</a>
-    <a href="{% url 'reporting' %}">Отчетность</a>
 </header>
 <!--<form action=""><input type=hidden name=id value={{allApplications.0}}><button>Счёт</button></form>-->
+{% if allApplications %}
 <a href="{% url 'installAccount' allApplications.0 %}" download="1">Счёт</a>
+{% endif %}
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
     {{ form }}
+    {% if allApplications %}
     <p>Номер: {{allApplications.0}}</p>
-    <p>Клиент: {{allApplications.1}}</p>
-    <p>Дата: {{allApplications.2}}</p>
-    <p>Статус: {{allApplications.3}}</p>
+    <p>Дата: {{allApplications.1}}</p>
+    <p>Статус: {{allApplications.2}}</p>
+    <p>Количество обучаемых: {{allApplications.3}}</p>
     <p>Автор: {{allApplications.4}}</p>
+    {% endif %}
     <table>
     <tr><th>Имя</th><th>Звание</th><th>Пол</th><th>СНИЛС</th><th>Возраст</th><th>Программа</th></tr>
     {% for formC in formsClients %}
@@ -54,4 +57,10 @@
         border-collapse: collapse;
     }
 </style>
+<script>
+    function addFunc() {
+        const action = document.getElementById("action")
+        action.value = "1"
+    }
+</script>
 </html>
