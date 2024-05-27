@@ -1,16 +1,14 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.utils.encoding import escape_uri_path
 from .forms import *
 
 def index(request):
     return HttpResponseRedirect('/login')
 
 def information(request):
-    import json
-    with open('company.json') as json_file:
-        data = json.load(json_file)
-    return render(request, 'information.html', {'dates': data})
+    return render(request, 'information.html')
 
 def users(request):
     import sqlite3
@@ -19,7 +17,6 @@ def users(request):
     if request.method == 'POST':
         allUsers = cur.execute('SELECT id FROM users').fetchall()
         listData = [int(i[0])-1 for i in list(request.POST.keys())[1:]]
-        print(listData)
         for data in allUsers:
             if data[0] in listData:
                 cur.execute(f'''UPDATE users SET admin = 1 WHERE id = {data[0]}''')
@@ -121,14 +118,11 @@ def applicationsTranslate(listData, idUser = -1):
         return listData
     else:
         import datetime
-        nameClient = cur.execute(f'SELECT name FROM clients where id = {listData[1]}').fetchone()[0]
-        listData.insert(2, nameClient)
         listData.insert(3, datetime.datetime.now())
         listData.insert(4, 0)
         listData.insert(5, 0)
         listData.append(idUser)
-        idTrainee = listData[0]
-        listData.append(idTrainee)
+        listData.append(listData[0])
         return listData
 
 def protocolsTranslate(listData, idUser = -1):
@@ -149,70 +143,13 @@ def clients(request):
     cur = con.cursor()
     allClients = cur.execute('SELECT * FROM clients').fetchall()
     return render(request, 'clients.html', {'allClients': allClients})
-
-def protocolsAdd(request):
-    if request.method == 'POST':
-        import sqlite3
-        con = sqlite3.connect('educationalDate.db')
-        cur = con.cursor()
-        value = list(request.POST.values())[-1]
-        id = len(cur.execute(f"SELECT * FROM protocols").fetchall())
-        listData = tuple(protocolsTranslate(([id] + list(request.POST.values())[1:-1]), request.COOKIES.get('id')))
-        cur.execute(f'''INSERT INTO protocols VALUES(?,?,?,?,?,?)''', listData)
-        if value == "1":
-            idTrainee = 0
-            countTrainee = 1
-            idR = cur.execute(f'SELECT MAX(idAll) FROM trainee').fetchone()[0]
-            idP = cur.execute(f'SELECT MAX(idAll) FROM protocolsClients').fetchone()[0]
-            idAll = max(int(idR if isinstance(idR, int) else -1),
-                     int(idP if isinstance(idP, int) else -1)) + 1
-            
-            cur.execute(
-                f'''INSERT INTO protocolsClients values ({idTrainee}, {id}, NULL, NULL, NULL, NULL, NULL, {idAll})''')
-            cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {id}")
-        con.commit()
-        return HttpResponseRedirect(f'/protocols/clients?id={id}')
-    else:
-        form = ProtocolsForm()
-        return render(request, 'procolsClients.html',
-                  {'form': form, 'formsClients': [], 'allProtocols': []})
-    
-def applicationsAdd(request):
-    if request.method == 'POST':
-        import sqlite3
-        con = sqlite3.connect('educationalDate.db')
-        cur = con.cursor()
-        value = list(request.POST.values())[-1]
-        id = len(cur.execute(f"SELECT * FROM applications").fetchall())
-        listData = tuple(applicationsTranslate(([id] + list(request.POST.values())[1:-1]), request.COOKIES.get('id')))
-        cur.execute(f'''INSERT INTO applications VALUES(?,?,?,?,?,?,?,?,?,?)''', listData)
-        if value == "1":
-            idTrainee = 0
-            countTrainee = 1
-            idR = cur.execute(f'SELECT MAX(idAll) FROM trainee').fetchone()[0]
-            idP = cur.execute(f'SELECT MAX(idAll) FROM protocolsClients').fetchone()[0]
-            idAll = max(int(idR if isinstance(idR, int) else -1),
-                     int(idP if isinstance(idP, int) else -1)) + 1
-            
-            cur.execute(
-                f'''INSERT INTO trainee values ({id}, NULL, NULL, NULL, NULL, NULL, NULL, {idTrainee}, {idAll})''')
-            cur.execute(f"update applications set countEmployees = {countTrainee} WHERE id = {id}")
-            print(f"update applications set countEmployees = {countTrainee} WHERE id = {id}")
-        con.commit()
-        return HttpResponseRedirect(f'/applications/list/clients?idApplication={id}')
-    else:
-        form = ApplicationsForm()
-        return render(request, 'listClients.html',
-                  {'form': form, 'formsClients': [], 'allApplications': []})
     
 def add(request):
-    listForm = [EmployeesForm, GroupReportsForm, ClientsForm, StudyingProgramForm, ApplicationsForm, None]
+    listForm = [EmployeesForm, GroupReportsForm, ClientsForm, StudyingProgramForm, None, None]
     idForm = int(request.GET.get('id-form'))
-    if idForm == 5:
-        return protocolsAdd(request)
-    elif idForm == 4:
-        return applicationsAdd(request)
     if request.method == 'POST':
+        if not listForm[idForm](request.POST).is_valid():
+            return render(request, 'add.html', {'form': listForm[idForm](), 'invalid': 'Заполните все поля'})
         import sqlite3
         con = sqlite3.connect('educationalDate.db')
         cur = con.cursor()
@@ -227,14 +164,9 @@ def add(request):
         id = len(cur.execute(f"SELECT * FROM {addRequest[idForm][0]}").fetchall())
         if idForm == 3:
             listDate = tuple(studyingProgramTranslate(([id] + list(request.POST.values())[1:]), 1))
-        elif idForm == 4:
-            listDate = tuple(applicationsTranslate(([id] + list(request.POST.values())[1:]), request.COOKIES.get('id')))
         else:
             listDate = tuple(([id] + list(request.POST.values())[1:]))
         cur.execute(f'''INSERT INTO {addRequest[idForm][0]} VALUES({addRequest[idForm][1]})''', listDate)
-        if idForm == 4:
-            idAll = int(cur.execute(f'SELECT MAX(idAll) FROM trainee').fetchone()[0]) + 1
-            cur.execute(f'''INSERT INTO trainee values ({listDate[-1]}, NULL, NULL, NULL, NULL, NULL, NULL, {0}, {idAll})''')
         con.commit()
         red = ['/information/employees', '/information/group-reports',
                '/applications/clients', '/information/studying-program',
@@ -257,6 +189,8 @@ def edit(request):
     addRequest = ['employees', 'groupReports', 'clients', 'studyingPrograms']
     if request.method == 'POST':
         listValue = list(request.POST.values())[1:]
+        if not listForm[idForm](request.POST).is_valid():
+            return render(request, 'edit.html', {'form': listForm[idForm](my_arg=listValue), 'invalid': 'Заполните все поля'})
         if idForm == 3:
             nameGroup = cur.execute(f'select nameGroup from groupReports where id = {listValue[3]}').fetchone()[0]
             listValue[3] = nameGroup
@@ -290,55 +224,116 @@ def applicationsList(request):
     return render(request, 'applicationsList.html', {'allApplications': nList})
 
 def listClients(request):
-    idApplication = int(request.GET.get('idApplication'))
+    z = request.GET.get('idApplication')
+    idApplication = -1 if z == "new" else int(z)
     import sqlite3
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
+    def retRender(date):
+        form1 = ApplicationsForm(my_arg=date[:3])
+        
+        nDate = date[3:]
+        formsClients1 = []
+        for i in range(len(nDate) // 6):
+            listValues = nDate[i * 6:(i + 1) * 6]
+            formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
+        
+        allApplications1 = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
+        allApplications1 = [allApplications1[0]] + allApplications1[3:5] + allApplications1[7:]
+        
+        return render(request, 'listClients.html',
+                      {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications1})
+    def retNewRender(date):
+        import datetime
+        form1 = ApplicationsForm(my_arg=date[:3])
+        
+        nDate = date[3:]
+        formsClients1 = []
+        for i in range(len(nDate) // 6):
+            listValues = nDate[i * 6:(i + 1) * 6]
+            formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
+        
+        id = len(cur.execute(f"SELECT * FROM applications").fetchall())
+        allApplications1 = [id, f'{datetime.datetime.now()}', 0, 0, request.COOKIES.get('id')]
+        
+        return render(request, 'listClients.html',
+                      {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications1})
+    
     if request.method == 'POST':
         listData = list(request.POST.values())[1:]
         applications = listData[:3]
-        if listData[-1] == "1":
-            idr = cur.execute(f'SELECT MAX(idInd) FROM trainee WHERE id = {idApplication}').fetchone()[0]
-            idTrainee = int(idr if isinstance(idr, int) else -1) + 1
+        value = listData[-1]
+        listData = listData[:-1]
+
+        if value == "0":
+            listData = listData[3:]
+            nameClient = cur.execute(f'SELECT name FROM clients where id = {applications[0]}').fetchone()[0]
+            applications.insert(1, nameClient)
             
-            countTrainee = int(cur.execute(f'SELECT countEmployees FROM applications WHERE id = {idApplication}').fetchone()[0]) + 1
-            
-            idR = cur.execute(f'SELECT MAX(idAll) FROM trainee').fetchone()[0]
-            idP = cur.execute(f'SELECT MAX(idAll) FROM protocolsClients').fetchone()[0]
-            idAll = max(int(idR if isinstance(idR, int) else -1),
-                     int(idP if isinstance(idP, int) else -1)) + 1
-            
-            cur.execute(f'''INSERT INTO trainee values ({idApplication}, NULL, NULL, NULL, NULL, NULL, NULL, {idTrainee}, {idAll})''')
-            cur.execute(f"update applications set countEmployees = {countTrainee} WHERE id = {idApplication}")
-            
-        listData = listData[3:-1]
-        nameClient = cur.execute(f'SELECT name FROM clients where id = {applications[0]}').fetchone()[0]
-        applications.insert(1, nameClient)
-        
-        cur.execute(f'update applications set idClient = ?, nameClient = ?, postpaid = ?, receiptPayment = ? where id = {idApplication}', tuple(applications))
-        
-        for i in range(len(listData)//6):
-            listValue = listData[i*6:(i+1)*6]
-            cur.execute(
-                f'update trainee set fullName = ?, post = ?, gender = ?, snils = ?, age = ?, prefStudyingProgram = ? where idInd = {i} and id = {idApplication}',
-                tuple(listValue)
-            )
-        con.commit()
-        return HttpResponseRedirect(f'/applications/list/clients?idApplication={idApplication}')
+            if idApplication == -1:
+                id = len(cur.execute(f"SELECT * FROM applications").fetchall())
+                listData2 = tuple(
+                    applicationsTranslate(([id] + applications), request.COOKIES.get('id')))
+                cur.execute(f'''INSERT INTO applications VALUES(?,?,?,?,?,?,?,?,?,?)''', listData2)
+                
+                countTrainee = 0
+                for i in range(len(listData) // 6):
+                    listValue = listData[i * 6:(i + 1) * 6]
+                    idTrainee = i
+                    
+                    cur.execute(f'INSERT INTO trainee values '
+                                + f"({id}, '{listValue[0]}', '{listValue[1]}', "
+                                + f"{listValue[2]}, {listValue[3]}, {listValue[4]}, {listValue[5]}, {idTrainee})")
+                    countTrainee += 1
+                idApplication = id
+            else:
+                cur.execute(
+                    f'update applications set idClient = ?, nameClient = ?, postpaid = ?, receiptPayment = ? where id = {idApplication}',
+                    tuple(applications))
+                
+                countTrainee = 0
+                cur.execute(f"DELETE FROM trainee WHERE id={idApplication}")
+                for i in range(len(listData) // 6):
+                    listValue = listData[i * 6:(i + 1) * 6]
+                    idr = cur.execute(f'SELECT MAX(idInd) FROM trainee WHERE id = {idApplication}').fetchone()[0]
+                    idTrainee = int(idr if isinstance(idr, int) else -1) + 1
+                    cur.execute(f'INSERT INTO trainee values '
+                     +f"({idApplication}, '{listValue[0]}', '{listValue[1]}', "
+                     +f"'{listValue[2]}', '{listValue[3]}', '{listValue[4]}', '{listValue[5]}', {idTrainee})")
+                    countTrainee += 1
+                
+            con.commit()
+            return HttpResponseRedirect(f'/applications/list/clients?idApplication={idApplication}')
+        elif value == "1":
+            for _ in range(6):
+                listData.append(None)
+        if idApplication == -1:
+            return retNewRender(listData)
+        return retRender(listData)
     else:
+        if idApplication == -1:
+            import datetime
+            id = len(cur.execute(f"SELECT * FROM applications").fetchall())
+            form = ApplicationsForm()
+            return render(request, 'listClients.html',
+                          {'form': form, 'formsClients': [],
+                           'allApplications': [id, f'{datetime.datetime.now()}', 0, 0, request.COOKIES.get('id')]})
         allApplications = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
-        #allApplications = applicationsTranslate(allApplications)
+        
         allApplicationsForm = [allApplications[1]]+allApplications[5:7]
-        allApplications = [allApplications[0]]+allApplications[2:5]+allApplications[7:]
+        allApplications = [allApplications[0]]+allApplications[3:5]+allApplications[7:]
+        
         form = ApplicationsForm(my_arg=allApplicationsForm)
+        
         listClient = list(cur.execute(f'SELECT * FROM trainee where id = {allApplications[-1]}').fetchall())
         formsClients = []
+        
         for i in range(len(listClient)):
             formsClients.append(ClientListForm(my_arg=listClient[i][1:], prefix=i))
         return render(request, 'listClients.html', {'form': form, 'formsClients': formsClients, 'allApplications': allApplications})
     
 def installAccount(request, id):
-    import docx, sqlite3, json
+    import docx, sqlite3, json, datetime
     doc = docx.Document()
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
@@ -368,7 +363,7 @@ def installAccount(request, id):
     allPrograms = [i[0] for i in allUsers]
     reqText = 'SELECT name, price, prefix FROM studyingPrograms WHERE '
     for i in allPrograms:
-        reqText += f"prefix = '{i}' or "
+        reqText += f"id = '{i}' or "
     reqText = reqText[:-4]
     listPrograms = cur.execute(reqText).fetchall()
     setPrograms = set(allPrograms)
@@ -394,7 +389,8 @@ def installAccount(request, id):
     table.cell(0, 4).text = 'Цена, руб.'
     table.cell(0, 5).text = 'Сумма, руб.'
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    response['Content-Disposition'] = 'attachment; filename=download.docx'
+    response['Content-Disposition'] = ("attachment; filename="
+                                       + escape_uri_path(f'счёт {applicationOne[2]} от {datetime.datetime.now()}.docx'))
     doc.save(response)
     con.commit()
     return response
@@ -412,64 +408,147 @@ def protocols(request):
     return render(request, 'protocols.html', {'allProtocols': nList})
 
 def protocolsClients(request):
-    idProtocols = int(request.GET.get('id'))
+    z = request.GET.get('id')
     import sqlite3
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
+    idProtocols = -1 if z == "new" else int(z)
+    def retRender(data):
+        form1 = ProtocolsForm(my_arg=data[:1])
+        listClient1 = data[1:]
+        formsClients = []
+        for j in range(len(listClient1)//4):
+            formsClients.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
+        allProtocol = list(cur.execute(f'SELECT * FROM protocols where id = {idProtocols}').fetchone())
+        allProtocol[5] = cur.execute(f'select name from users where id = {allProtocol[5]}').fetchone()[0]
+        allProtocol = [allProtocol[0]] + allProtocol[3:]
+        return render(request, 'protocolsClients.html',
+                      {'form': form1, 'formsClients': formsClients, 'allProtocols': allProtocol})
+    def retNewRender(data):
+        import datetime
+        id = len(cur.execute(f"SELECT * FROM protocols").fetchall())
+        if not data:
+            form1 = ProtocolsForm()
+            listClient1 = data[1:]
+            return render(request, 'protocolsClients.html',
+                          {'form': form1, 'formsClients': [],
+                           'allProtocols': [id, f'{datetime.datetime.now()}', request.COOKIES.get('id'), 0]})
+        form1 = ProtocolsForm(my_arg=data[:1])
+        listClient1 = data[1:]
+        formsClients1 = []
+        for j in range(len(listClient1)//4):
+            formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
+        return render(request, 'protocolsClients.html',
+                      {'form': form1, 'formsClients': formsClients1,
+                       'allProtocols': [id, f'{datetime.datetime.now()}', request.COOKIES.get('id'), 0]})
+    def addLine(listData1):
+        clientID = \
+        cur.execute(f"SELECT idClient FROM applications WHERE idTrainee = {listTrainee[trainee][0]}").fetchone()[0]
+        for el in [listTrainee[trainee][1], clientID, listTrainee[trainee][4], None]:
+            listData1.append(el)
+        return listData1
     if request.method == 'POST':
         listData = list(request.POST.values())[1:]
+        value = listData[-1]
+        listData = listData[:-1]
         protocol = [listData[0]]
-        if listData[-1] == "1":
-            idr = cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
-            idTrainee = int(idr if isinstance(idr, int) else -1) + 1
-            
-            countTrainee = int(cur.execute(f'SELECT countTrainee FROM protocols WHERE id = {idProtocols}').fetchone()[0]) + 1
-            
-            idR = cur.execute(f'SELECT MAX(idAll) FROM trainee').fetchone()[0]
-            idP = cur.execute(f'SELECT MAX(idAll) FROM protocolsClients').fetchone()[0]
-            idAll = max(int(idR if isinstance(idR, int) else -1),
-                     int(idP if isinstance(idP, int) else -1)) + 1
-            
-            cur.execute(f'''INSERT INTO protocolsClients values ({idTrainee}, {idProtocols}, NULL, NULL, NULL, NULL, NULL, {idAll})''')
-            cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
-        elif listData[-1] == "2":
-            idStudyingProgram = cur.execute(f"SELECT idStudyingProgram FROM protocols WHERE id = {idProtocols}").fetchone()[0]
-            listTrainee = cur.execute(f"SELECT * FROM trainee WHERE prefStudyingProgram = {idStudyingProgram}").fetchall()
-            countTrainee = int(cur.execute(f'SELECT countTrainee FROM protocols WHERE id = {idProtocols}').fetchone()[0])
-            count = 0
-            for trainee in range(len(listTrainee)):
-                traineeProtocols = cur.execute(f"SELECT * FROM protocolsClients WHERE idAll = {listTrainee[trainee][-1]}").fetchone()
-                if not traineeProtocols:
-                    idTrainee = trainee + countTrainee
-                    clientID = cur.execute(f"SELECT idClient FROM applications WHERE idTrainee = {listTrainee[trainee][0]}").fetchone()[0]
-                    cur.execute(f'''INSERT INTO protocolsClients values ({idTrainee}, {idProtocols}, '{listTrainee[trainee][1]}', {clientID}, '{listTrainee[trainee][4]}', NULL, NULL, {listTrainee[trainee][-1]})''')
-                    count += 1
-            cur.execute(f"update protocols set countTrainee = {count+countTrainee} WHERE id = {idProtocols}")
+        if value == "0":
+            nameClient = cur.execute(f'SELECT name FROM studyingPrograms where id = {protocol[0]}').fetchone()[0]
+            protocol.append(nameClient)
+            if idProtocols == -1:
+                idProtocols = len(cur.execute(f"SELECT * FROM protocols").fetchall())
+                listData1 = tuple(
+                    protocolsTranslate(([idProtocols] + listData[:1]), request.COOKIES.get('id')))
+                cur.execute(f'''INSERT INTO protocols VALUES(?,?,?,?,?,?)''', listData1)
+                countTrainee = 0
+                listData = listData[1:]
+                for i in range(len(listData) // 4):
+                    listValue = listData[i * 4:(i + 1) * 4]
+                    idr = \
+                    cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
+                    idTrainee = int(idr if isinstance(idr, int) else -1) + 1
+                    
+                    cur.execute(f'INSERT INTO protocolsClients values' +
+                                f"({idTrainee}, {idProtocols}, '{listValue[0]}', {listValue[1]}, '{listValue[2]}', '{listValue[3]}', NULL)")
+                    countTrainee += 1
+                cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
+            else:
+                cur.execute(
+                    f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ? where id = {idProtocols}',
+                    tuple(protocol)
+                )
+                
+                cur.execute(f"DELETE FROM protocolsClients WHERE idProtocols={idProtocols}")
+                countTrainee = 0
+                listData = listData[1:]
+                for i in range(len(listData) // 4):
+                    listValue = listData[i * 4:(i + 1) * 4]
+                    idr = cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
+                    idTrainee = int(idr if isinstance(idr, int) else -1) + 1
+                    
+                    cur.execute(f'INSERT INTO protocolsClients values'+
+                    f"({idTrainee}, {idProtocols}, '{listValue[0]}', {listValue[1]}, '{listValue[2]}', '{listValue[3]}', NULL)")
+                    countTrainee += 1
+                cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
             con.commit()
-        listData = listData[1:-1]
-        nameClient = cur.execute(f'SELECT name FROM studyingPrograms where id = {protocol[0]}').fetchone()[0]
-        protocol.append(nameClient)
-        cur.execute(
-            f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ? where id = {idProtocols}',
-            tuple(protocol)
-        )
-        for i in range(len(listData) // 4):
-            listValue = listData[i * 4:(i + 1) * 4]
-            cur.execute(
-                f'update protocolsClients set fullName = ?, idClient = ?, snils = ?, result = ? where id = {i} and idProtocols = {idProtocols}',
-                tuple(listValue)
-            )
+            return HttpResponseRedirect(f'/protocols/clients?id={idProtocols}')
+        elif value == "1":
+            for _ in range(4):
+                listData.append(None)
+        elif value == "2":
+            idStudyingProgram = protocol[0]
+            listTrainee = cur.execute(f"SELECT * FROM trainee WHERE prefStudyingProgram = {idStudyingProgram}").fetchall()
+            listData1 = []
+            for trainee in range(len(listTrainee)):
+                traineeProtocols = cur.execute(f"SELECT * FROM protocolsClients WHERE fullName = "
+                                                +f"'{listTrainee[trainee][1]}' and snils = '{listTrainee[trainee][4]}' ").fetchone()
+                if not traineeProtocols:
+                    listData1 = addLine(listData1)
+                else:
+                    id2 = cur.execute(f"SELECT * FROM protocols WHERE id = {traineeProtocols[1]}").fetchone()[1]
+                    if str(id2) != str(idStudyingProgram):
+                        listData1 = addLine(listData1)
+            if listData1:
+                listData = listData[:1]
+                for el in listData1:
+                    listData.append(el)
         con.commit()
-        return HttpResponseRedirect(f'/protocols/clients?id={idProtocols}')
+        if idProtocols == -1:
+            return retNewRender(listData)
+        return retRender(listData)
     else:
-        allProtocols = list(cur.execute(f'SELECT * FROM protocols where id = {idProtocols}').fetchone())
-        allProtocols[5] = cur.execute(f'select name from users where id = {allProtocols[5]}').fetchone()[0]
+        if idProtocols == -1:
+            return retNewRender([])
+        allProtocols = list(cur.execute(f"SELECT * FROM protocols where id = '{idProtocols}'").fetchone())
+        allProtocols[5] = cur.execute(f"select name from users where id = '{allProtocols[5]}'").fetchone()[0]
         allApplicationsForm = [allProtocols[1]]
         allProtocols = [allProtocols[0]] + allProtocols[3:]
         form = ProtocolsForm(my_arg=allApplicationsForm)
         listClient = list(cur.execute(f'SELECT * FROM protocolsClients where idProtocols = {allProtocols[0]}').fetchall())
         formsClients = []
         for i in range(len(listClient)):
-            formsClients.append(ProtocolsClientsForm(my_arg=listClient[i][1:], prefix=i))
-        return render(request, 'procolsClients.html',
+            formsClients.append(ProtocolsClientsForm(my_arg=listClient[i][2:], prefix=i))
+        return render(request, 'protocolsClients.html',
                       {'form': form, 'formsClients': formsClients, 'allProtocols': allProtocols})
+
+def company(request):
+    import json
+    if request.method == 'POST':
+        listData = list(request.POST.values())[1:]
+        with open('company.json', 'w') as json_file:
+            data = {
+                "name": listData[0],
+                "inn": listData[1],
+                "kpp": listData[2],
+                "bankAccount": listData[3],
+                "address": listData[4],
+                "supervisor": listData[5]
+                }
+            dataJson = json.dumps(data)
+            json_file.write(dataJson)
+        return HttpResponseRedirect(f'/information/company')
+    else:
+        with open('company.json') as json_file:
+            data = list(json.load(json_file).values())
+        form = CompanyForm(my_arg=data)
+        return render(request, 'company.html', {'form': form})

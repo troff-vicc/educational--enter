@@ -205,7 +205,27 @@ class ProtocolsClientsForm(forms.Form):
         tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
         self.fields['idClients'].choices = tupleGroup
         if t:
-            self.fields['fullName'].widget = forms.TextInput(attrs={'value': my_arg[1]})
-            self.initial['idClients'] = my_arg[2]
-            self.fields['snils'].widget = forms.NumberInput(attrs={'value': my_arg[3]})
-            self.fields['result'].widget = forms.TextInput(attrs={'value': my_arg[4]})
+            self.fields['fullName'].widget = forms.TextInput(attrs={'value': my_arg[0]})
+            self.initial['idClients'] = my_arg[1]
+            self.fields['snils'].widget = forms.NumberInput(attrs={'value': my_arg[2]})
+            self.fields['result'].widget = forms.TextInput(attrs={'value': my_arg[3]})
+            
+class CompanyForm(forms.Form):
+    name = forms.CharField(label='Наименование', max_length=256)
+    inn = forms.IntegerField(label='ИНН')
+    kpp = forms.IntegerField(label='КПП')
+    bankAcaunt = forms.IntegerField(label='Банковский cчёт')
+    address = forms.CharField(label='Адрес', max_length=256)
+    supervisor = forms.CharField(label='Руководитель', max_length=256)
+    def __init__(self, *args, **kwargs):
+        if kwargs:
+            my_arg = kwargs.pop('my_arg')
+            super(CompanyForm, self).__init__(*args, **kwargs)
+            self.fields['name'].widget = forms.TextInput(attrs={'value': my_arg[0]})
+            self.fields['inn'].widget = forms.NumberInput(attrs={'value': my_arg[1]})
+            self.fields['kpp'].widget = forms.NumberInput(attrs={'value': my_arg[2]})
+            self.fields['bankAcaunt'].widget = forms.NumberInput(attrs={'value': my_arg[3]})
+            self.fields['address'].widget = forms.TextInput(attrs={'value': my_arg[4]})
+            self.fields['supervisor'].widget = forms.TextInput(attrs={'value': my_arg[5]})
+        else:
+            super(CompanyForm, self).__init__(*args, **kwargs)

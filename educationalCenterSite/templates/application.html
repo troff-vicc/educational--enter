@@ -4,16 +4,76 @@
 <head>
     <meta charset="UTF-8">
     <title>Дом</title>
+    <link rel="stylesheet" href="{% static 'css/cssTemplatesHome.css'%}">
 </head>
 <body>
 <header>
-    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
-    <a href="{% url 'applications' %}">Заявки</a>
-    <a href="{% url 'protocols' %}">Протоколы</a>
+    <div class="headEl" id="referenceInformation">
+        <a href="{% url 'referenceInformation' %}">
+            <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" 
+                  d="M2 2H12V11H2V2ZM0 2C0 0.89543 0.895431
+                   0 2 0H12C13.1046 0 14 0.895431 14 2V11C14
+                    12.1046 13.1046 13 12 13H2V15H12V14H14V15C14
+                     16.1046 13.1046 17 12 17H2C0.895431 17 0 16.1046
+                      0 15V13V2Z" fill="white">
+                
+            </path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6H4V4H10V6Z" fill="white"></path>
+            </svg>
+            <p>Справочная информация</p>
+        </a>
+    </div>
+    <div class="headEl" id="applications" name="on">
+        <a href="{% url 'applications' %}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 1V4V13H1V4L4 1H13Z" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M4 5H10" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M4 9H10" stroke="#FFFFFF" stroke-width="2"></path>
+            </svg>
+
+            <p>Заявки</p>
+        </a>
+    </div>
+    <div class="headEl" id="protocols">
+        <a href="{% url 'protocols' %}">
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.4854 6V2H6.48535V1H1.48535V12" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M1.48535 11L5.48535 6H15.4854V6.5L12.4854 11H1.86035" stroke="#FFFFFF" stroke-width="2"></path>
+            </svg>
+            <p>Протоколы</p>
+        </a>
+    </div>
 </header>
 <main>
-    <a href="{% url 'clients' %}">Клиенты</a>
-    <a href="{% url 'applicationsList' %}">Заявки</a>
+    <div class="mainEl" id="clients">
+        <a href="{% url 'clients' %}">
+            <div id="clientsN">
+                <svg width="15" height="14" viewBox="0 0 15 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M0.485352 12C0.485352 10.3431 1.8285 9 3.48535
+                 9H11.4854C13.1422 9 14.4854 10.3431 14.4854 12V14H12.4854V12C12.4854 11.4477 12.0376 11 11.4854
+                  11H3.48535C2.93307 11 2.48535 11.4477 2.48535 12V14H0.485352V12Z" fill="#303956"></path>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.48535 6C8.58992 6 9.48535 5.10457 9.48535 
+                4C9.48535 2.89543 8.58992 2 7.48535 2C6.38078 2 5.48535 2.89543 5.48535 4C5.48535 5.10457 6.38078 
+                6 7.48535 6ZM7.48535 8C9.69449 8 11.4854 6.20914 11.4854 4C11.4854 1.79086 9.69449 0 7.48535 0C5.27621
+                 0 3.48535 1.79086 3.48535 4C3.48535 6.20914 5.27621 8 7.48535 8Z" fill="#303956"></path>
+                </svg>
+            </div>
+            <p>Клиенты</p>
+        </a>
+    </div>
+        <div class="mainEl" id="applicationsList">
+        <a href="{% url 'applicationsList' %}">
+            <div id="applicationsListN">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 1V4V13H1V4L4 1H13Z" stroke="#303956" stroke-width="2"></path>
+                <path d="M4 5H10" stroke="#303956" stroke-width="2"></path>
+                <path d="M4 9H10" stroke="#303956" stroke-width="2"></path>
+            </svg>
+            </div>
+            <p>Заявки</p>
+        </a>
+    </div>
 </main>
 </body>
 </html>

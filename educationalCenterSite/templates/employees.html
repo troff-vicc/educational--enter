@@ -4,17 +4,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Пользователи</title>
+    <link rel="stylesheet" href="{% static 'css/cssTemplatesTable.css' %}">
 </head>
 <body>
 <header>
-    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
-    <a href="{% url 'applications' %}">Заявки</a>
-    <a href="{% url 'protocols' %}">Протоколы</a>
+    <div class="headEl" id="referenceInformation" name="on">
+        <a href="{% url 'referenceInformation' %}">
+            <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" 
+                  d="M2 2H12V11H2V2ZM0 2C0 0.89543 0.895431
+                   0 2 0H12C13.1046 0 14 0.895431 14 2V11C14
+                    12.1046 13.1046 13 12 13H2V15H12V14H14V15C14
+                     16.1046 13.1046 17 12 17H2C0.895431 17 0 16.1046
+                      0 15V13V2Z" fill="white">
+                
+            </path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6H4V4H10V6Z" fill="white"></path>
+            </svg>
+            <p>Справочная информация</p>
+        </a>
+    </div>
+    <div class="headEl" id="applications">
+        <a href="{% url 'applications' %}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 1V4V13H1V4L4 1H13Z" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M4 5H10" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M4 9H10" stroke="#FFFFFF" stroke-width="2"></path>
+            </svg>
+
+            <p>Заявки</p>
+        </a>
+    </div>
+    <div class="headEl" id="protocols">
+        <a href="{% url 'protocols' %}">
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.4854 6V2H6.48535V1H1.48535V12" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M1.48535 11L5.48535 6H15.4854V6.5L12.4854 11H1.86035" stroke="#FFFFFF" stroke-width="2"></path>
+            </svg>
+            <p>Протоколы</p>
+        </a>
+    </div>
 </header>
 <main>
-<form action="{% url 'add' %}"><input type=hidden name=id-form value=0><button>Добавить</button></form>
+<form action="{% url 'add' %}">
+    <input type=hidden name=id-form value=0>
+    <button>Добавить</button>
+</form>
 <table>
-    <tr><th>Номер</th><th>ФИО</th><th>Должность</th></tr>
+    <tr id="headTr"><th>Номер</th><th>ФИО</th><th>Должность</th></tr>
     {% for user in allEmployees %}
         <tr id="{{user.0}}" onclick="window.location.href = `{% url 'edit' %}?id-form=0&id-row={{user.0}}`">
             <th class="id" name="{{user.0}}">{{user.0}}</th>
@@ -24,5 +61,6 @@
     {% endfor %}
 </table>
 </main>
+<script src="{% static 'js/jsTemplatesTable.js' %}"></script>
 </body>
 </html>

@@ -1,31 +1,85 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Добавление</title>
+    <link rel="stylesheet" href="{% static 'css/cssTemplatesClients.css' %}">
 </head>
 <body>
 <header>
-    <a href="{% url 'referenceInformation' %}">Справочная информация</a>
-    <a href="{% url 'applications' %}">Заявки</a>
-    <a href="{% url 'protocols' %}">Протоколы</a>
+    <div class="headEl" id="referenceInformation">
+        <a href="{% url 'referenceInformation' %}">
+            <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" 
+                  d="M2 2H12V11H2V2ZM0 2C0 0.89543 0.895431
+                   0 2 0H12C13.1046 0 14 0.895431 14 2V11C14
+                    12.1046 13.1046 13 12 13H2V15H12V14H14V15C14
+                     16.1046 13.1046 17 12 17H2C0.895431 17 0 16.1046
+                      0 15V13V2Z" fill="white">
+            </path>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6H4V4H10V6Z" fill="white"></path>
+            </svg>
+            <p>Справочная информация</p>
+        </a>
+    </div>
+    <div class="headEl" id="applications" name="on">
+        <a href="{% url 'applications' %}">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 1V4V13H1V4L4 1H13Z" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M4 5H10" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M4 9H10" stroke="#FFFFFF" stroke-width="2"></path>
+            </svg>
+
+            <p>Заявки</p>
+        </a>
+    </div>
+    <div class="headEl" id="protocols">
+        <a href="{% url 'protocols' %}">
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.4854 6V2H6.48535V1H1.48535V12" stroke="#FFFFFF" stroke-width="2"></path>
+                <path d="M1.48535 11L5.48535 6H15.4854V6.5L12.4854 11H1.86035" stroke="#FFFFFF" stroke-width="2"></path>
+            </svg>
+            <p>Протоколы</p>
+        </a>
+    </div>
 </header>
 <!--<form action=""><input type=hidden name=id value={{allApplications.0}}><button>Счёт</button></form>-->
-{% if allApplications %}
-<a href="{% url 'installAccount' allApplications.0 %}" download="1">Счёт</a>
-{% endif %}
+<main>
+<a href="{% url 'installAccount' allApplications.0 %}" download="1" id="score">
+    <svg width="15" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M13.4854 1H1.48535V15.5L4.98535 14L7.48535 16L9.98535 14L13.4854 15.5V1Z" stroke="#303956" stroke-width="2"></path>
+    <path d="M3.48535 5H11.4854" stroke="#303956" stroke-width="2"></path>
+    <path d="M3.48535 9H11.4854" stroke="#303956" stroke-width="2"></path>
+    </svg>
+    <p>Счёт</p>
+</a>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
     {{ form }}
-    {% if allApplications %}
-    <p>Номер: {{allApplications.0}}</p>
-    <p>Дата: {{allApplications.1}}</p>
-    <p>Статус: {{allApplications.2}}</p>
-    <p>Количество обучаемых: {{allApplications.3}}</p>
-    <p>Автор: {{allApplications.4}}</p>
-    {% endif %}
+    <div class="container">
+        <p class="label">Номер:</p>
+        <p class="clientsData">{{allApplications.0}}</p>
+    </div>
+    <div class="container">
+        <p class="label">Дата:</p>
+        <p class="clientsData">{{allApplications.1}}</p>
+    </div>
+    <div class="container">
+        <p class="label">Статус:</p>
+        <p class="clientsData">{{allApplications.2}}</p>
+    </div>
+    <div class="container">
+        <p class="label">Количество обучаемых:</p>
+        <p class="clientsData">{{allApplications.3}}</p>
+    </div>
+    <div class="container">
+        <p class="label">Автор:</p>
+        <p class="clientsData">{{allApplications.4}}</p>
+    </div>
+    <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
     <table>
-    <tr><th>Имя</th><th>Звание</th><th>Пол</th><th>СНИЛС</th><th>Возраст</th><th>Программа</th></tr>
+    <tr id="headTr"><th>Имя</th><th>Звание</th><th>Пол</th><th>СНИЛС</th><th>Возраст</th><th>Программа</th></tr>
     {% for formC in formsClients %}
         <tr>
             <th>{{formC.fullName}}</th>
@@ -37,26 +91,12 @@
         </tr>
     {% endfor %}
     </table>
-    <input type=hidden name=action id="action" value="0">
     <br>
-    <input type="submit" id="button" value="Сохранить">
-    <input type="submit" id="add" value="Добавить" onclick="addFunc();">
+    <input type="submit" id="save" value="Сохранить">
+    <input type=hidden name=action id="action" value="0">
 </form>
+</main>
 </body>
-<style>
-    tr,th{
-        border: 1px solid black;
-    }
-    table{
-        select{
-            border:none;
-        }
-        input{
-            border:none;
-        }
-        border-collapse: collapse;
-    }
-</style>
 <script>
     function addFunc() {
         const action = document.getElementById("action")

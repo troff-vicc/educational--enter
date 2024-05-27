@@ -1,0 +1,132 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    display: flex;
+    background-color: #F7F8FC;
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url(http://fonts.gstatic.com/s/roboto/v15/mErvLBYg_cXG3rLvUsKT_fesZW2xOQ-xsNqO47m55DA.woff2);
+}
+
+html{
+header {
+    background-color: #303956;
+    float: left;
+    height: 100vh;
+    min-width: 176px;
+
+    position: sticky;
+    top: 0;
+}
+
+.headEl {
+    a {
+        display: flex;
+        align-items: center;
+
+        width: 160px;
+        height: 48px;
+
+        text-decoration: none;
+
+        svg {
+            margin-left: 16px;
+            min-height: 17px;
+            min-width: 14px;
+        }
+
+        p {
+            margin-left: 19px;
+
+            font-family: Roboto, serif;
+            text-transform: uppercase;
+
+            color: #FFFFFF;
+            font-size: 10px;
+            line-height: 12px;
+            letter-spacing: 0.05em;
+            text-align: left;
+            Opacity: .5;
+        }
+    }
+
+    width: 160px;
+    height: 48px;
+
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+
+    border-radius: 4px;
+}
+
+div[name="on"] {
+    background-color: #252C45;
+}
+
+} /*header*/
+
+html{
+    main{
+        padding: 20px 40px;
+    }
+    form button {
+        width: 110px;
+        height: 40px;
+        border: 1px solid #C4C4C4;
+
+        background: #FFFFFF;
+
+        font-family: Roboto, serif;
+        font-size: 16px;
+        line-height: 19px;
+        text-align: center;
+        border-radius: 4px;
+
+        &:hover {
+            background: #F6F6F6;
+        }
+
+        &:active {
+            Opacity: .5;
+        }
+    }
+    table {
+        tr {
+            border: 1px solid #C4C4C4;
+            background: #FFFFFF;
+        }
+
+        th {
+            padding: 13px 20px 13px 20px;
+        }
+
+        #headTr {
+            background: #34ADEE;
+            color: #FFFFFF;
+        }
+
+        border-collapse: collapse;
+        border: 1px solid #C4C4C4;
+    }
+        #save{
+        /* col_green */
+
+        width: 102px;
+        height: 36px;
+
+        font-family: Roboto, serif;
+        font-size: 14px;
+        line-height: 16px;
+        text-align: center;
+        color: #FFFFFF;
+
+        background: #59CC47;
+        border: 1px solid #3DB929;
+        border-radius: 3px;
+
+        margin-top: 10px;
+    }
+} /*main*/
