@@ -187,11 +187,12 @@ class ProtocolsClientsForm(forms.Form):
     conn = sqlite3.connect('educationalDate.db')
     cur = conn.cursor()
     listGroup = cur.execute('select * from clients').fetchall()
+    resulChoose = ((0, 'Зачет'), (1, 'Незачет'), (2, 'Пропуск'))
     tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
     fullName = forms.CharField(label='Имя', max_length =100)
     idClients = forms.ChoiceField(label='Клиент', choices=tupleGroup)
     snils = forms.IntegerField(label='Снилс')
-    result = forms.CharField(label='Результат', max_length=100)
+    result = forms.ChoiceField(label='Результат', choices=resulChoose)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
@@ -208,7 +209,7 @@ class ProtocolsClientsForm(forms.Form):
             self.fields['fullName'].widget = forms.TextInput(attrs={'value': my_arg[0]})
             self.initial['idClients'] = my_arg[1]
             self.fields['snils'].widget = forms.NumberInput(attrs={'value': my_arg[2]})
-            self.fields['result'].widget = forms.TextInput(attrs={'value': my_arg[3]})
+            self.initial['result'] = my_arg[3]
             
 class CompanyForm(forms.Form):
     name = forms.CharField(label='Наименование', max_length=256)

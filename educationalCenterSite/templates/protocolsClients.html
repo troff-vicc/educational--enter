@@ -17,7 +17,6 @@
                     12.1046 13.1046 13 12 13H2V15H12V14H14V15C14
                      16.1046 13.1046 17 12 17H2C0.895431 17 0 16.1046
                       0 15V13V2Z" fill="white">
-                
             </path>
             <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6H4V4H10V6Z" fill="white"></path>
             </svg>
@@ -35,7 +34,7 @@
             <p>Заявки</p>
         </a>
     </div>
-    <div class="headEl" id="protocols">
+    <div class="headEl" id="protocols" name="on">
         <a href="{% url 'protocols' %}">
             <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12.4854 6V2H6.48535V1H1.48535V12" stroke="#FFFFFF" stroke-width="2"></path>
@@ -49,25 +48,17 @@
 <main>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
-    {{ form }}
-    {% if allProtocols %}
-        <div class="container">
+    <div class="container1">
+        <div class="container" id="number">
             <p class="label">Номер:</p> 
             <p class="clientsData">{{allProtocols.0}}</p>
         </div>
-        <div class="container">
+        <div class="container" id="date">
             <p class="label">Дата:</p> 
             <p class="clientsData">{{allProtocols.1}}</p>
         </div>
-        <div class="container">
-            <p class="label">Автор:</p> 
-            <p class="clientsData">{{allProtocols.3}}</p>
-        </div>
-        <div class="container">
-            <p class="label">Количество обучаемых:</p>
-            <p class="clientsData">{{allProtocols.2}}</p>
-        </div>
-    {% endif %}
+    </div>
+    {{ form }}
     <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
     <table>
     <tr id="headTr"><th>Имя</th><th>Клиент</th><th>Снилс</th><th>Результат</th></tr>
@@ -84,6 +75,17 @@
     <br>
     <input type="submit" id="save" value="Сохранить">
     <input type="submit" id="fill" value="Заполнить" onclick="fillFunc()">
+    
+    <div class="container1">
+        <div class="container" id="autor">
+            <p class="label">Автор:</p> 
+            <p class="clientsData">{{allProtocols.3}}</p>
+        </div>
+        <div class="container" id="count">
+            <p class="label">Количество обучаемых:</p>
+            <p class="clientsData">{{allProtocols.2}}</p>
+        </div>
+    </div>
 </form>
 </main>
 </body>

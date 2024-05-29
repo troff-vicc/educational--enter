@@ -1,8 +1,8 @@
 html, body {
     padding: 0;
     margin: 0;
+    background: #F7F8FC;
     display: flex;
-    background-color: #F7F8FC;
 }
 
 @font-face {
@@ -15,7 +15,7 @@ header {
     background-color: #303956;
     float: left;
     height: 100vh;
-    min-width: 176px;
+    width: 176px;
 
     position: sticky;
     top: 0;
@@ -62,7 +62,7 @@ header {
     border-radius: 4px;
 }
 
-div[name="on"] {
+#referenceInformation {
     background-color: #252C45;
 }
 
@@ -70,50 +70,31 @@ div[name="on"] {
 
 html{
     main{
-        padding: 20px 40px;
+        padding: 0 40px;
+        display: block;
     }
-    form button {
-        width: 110px;
-        height: 40px;
-        border: 1px solid #C4C4C4;
+    form{
+        display: block;
+        align-items: center;
 
-        background: #FFFFFF;
+        margin-top: 30px;
+        input, select{
+            width: 367px;
+            height: 40px;
 
-        font-family: Roboto, serif;
-        font-size: 16px;
-        line-height: 19px;
-        text-align: center;
-        border-radius: 4px;
-
-        &:hover {
-            background: #F6F6F6;
+            border: 1px solid #B4B4B4;
+            border-radius: 4px;
         }
-
-        &:active {
-            Opacity: .5;
         }
-    }
-    table {
-        tr {
-            border: 1px solid #C4C4C4;
-            background: #FFFFFF;
+    p{
+            font-family: Roboto, serif;
+            font-size: 14px;
+            line-height: 16px;
+            text-align: left;
+
+            color: #333333;
         }
-
-        th {
-            padding: 13px 20px 13px 20px;
-        }
-
-        #headTr {
-            background: #34ADEE;
-            color: #FFFFFF;
-        }
-
-        margin-top: 10px;
-
-        border-collapse: collapse;
-        border: 1px solid #C4C4C4;
-    }
-        #save{
+    #save{
         /* col_green */
 
         width: 102px;
@@ -130,5 +111,13 @@ html{
         border-radius: 3px;
 
         margin-top: 10px;
+    }
+    #error{
+        font-family: Roboto, serif;
+        font-size: 14px;
+        line-height: 16px;
+        text-align: center;
+
+        color: #c50000;
     }
 } /*main*/

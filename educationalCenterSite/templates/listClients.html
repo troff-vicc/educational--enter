@@ -56,26 +56,31 @@
 </a>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
-    {{ form }}
-    <div class="container">
+    <div class="container1">
+    <div class="container" id="number">
         <p class="label">Номер:</p>
         <p class="clientsData">{{allApplications.0}}</p>
     </div>
-    <div class="container">
+    <div class="container" id="date">
         <p class="label">Дата:</p>
         <p class="clientsData">{{allApplications.1}}</p>
     </div>
-    <div class="container">
-        <p class="label">Статус:</p>
-        <p class="clientsData">{{allApplications.2}}</p>
     </div>
-    <div class="container">
-        <p class="label">Количество обучаемых:</p>
-        <p class="clientsData">{{allApplications.3}}</p>
-    </div>
-    <div class="container">
-        <p class="label">Автор:</p>
-        <p class="clientsData">{{allApplications.4}}</p>
+    <div id="formDiv">
+        <div id="idClient">
+            {{ form.idClient.label_tag }}
+            {{ form.idClient }}
+        </div>
+        <div class="container1">
+            <div id="postpaid">
+                {{ form.postpaid.label_tag }}
+                {{ form.postpaid }}
+            </div>
+            <div id="receiptPayment">
+                {{ form.receiptPayment.label_tag }}
+                {{ form.receiptPayment }}
+            </div>
+        </div>
     </div>
     <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
     <table>
@@ -94,6 +99,20 @@
     <br>
     <input type="submit" id="save" value="Сохранить">
     <input type=hidden name=action id="action" value="0">
+    <div class="container1">
+    <div class="container" id="count">
+        <p class="label">Количество обучаемых:</p>
+        <p class="clientsData">{{allApplications.3}}</p>
+    </div>
+    <div class="container" id="autor">
+        <p class="label">Автор:</p>
+        <p class="clientsData">{{allApplications.4}}</p>
+    </div>
+    <div class="container" id="status">
+        <p class="label">Статус:</p>
+        <p class="clientsData">{{allApplications.2}}</p>
+    </div>
+    </div>
 </form>
 </main>
 </body>

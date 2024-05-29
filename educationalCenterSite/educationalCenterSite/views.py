@@ -8,6 +8,8 @@ def index(request):
     return HttpResponseRedirect('/login')
 
 def information(request):
+    if not request.COOKIES.get('id'):
+        return HttpResponseRedirect('/login')
     return render(request, 'information.html')
 
 def users(request):
@@ -118,9 +120,9 @@ def applicationsTranslate(listData, idUser = -1):
         return listData
     else:
         import datetime
-        listData.insert(3, datetime.datetime.now())
+        listData.insert(3, datetime.datetime.now().strftime('%d.%m.%Y %X'))
         listData.insert(4, 0)
-        listData.insert(5, 0)
+        listData.append(0)
         listData.append(idUser)
         listData.append(listData[0])
         return listData
@@ -132,7 +134,7 @@ def protocolsTranslate(listData, idUser = -1):
     import datetime
     nameProgram = cur.execute(f'SELECT name FROM studyingPrograms where id = {listData[1]}').fetchone()[0]
     listData.insert(2, nameProgram)
-    listData.insert(3, datetime.datetime.now())
+    listData.insert(3, datetime.datetime.now().strftime('%d.%m.%Y %X'))
     listData.insert(4, 1)
     listData.append(idUser)
     return listData
@@ -177,6 +179,8 @@ def add(request):
     return render(request, 'add.html', {'form': form})
 
 def application(request):
+    if not request.COOKIES.get('id'):
+        return HttpResponseRedirect('/login')
     return render(request, 'application.html')
 
 def edit(request):
@@ -254,7 +258,7 @@ def listClients(request):
             formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
         
         id = len(cur.execute(f"SELECT * FROM applications").fetchall())
-        allApplications1 = [id, f'{datetime.datetime.now()}', 0, 0, request.COOKIES.get('id')]
+        allApplications1 = [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), 0, 0, request.COOKIES.get('id')]
         
         return render(request, 'listClients.html',
                       {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications1})
@@ -283,7 +287,8 @@ def listClients(request):
                     
                     cur.execute(f'INSERT INTO trainee values '
                                 + f"({id}, '{listValue[0]}', '{listValue[1]}', "
-                                + f"{listValue[2]}, {listValue[3]}, {listValue[4]}, {listValue[5]}, {idTrainee})")
+                                f"'{listValue[2]}', '{listValue[3]}', '{listValue[4]}', "
+                                f"'{listValue[5]}', {idTrainee})")
                     countTrainee += 1
                 idApplication = id
             else:
@@ -301,7 +306,7 @@ def listClients(request):
                      +f"({idApplication}, '{listValue[0]}', '{listValue[1]}', "
                      +f"'{listValue[2]}', '{listValue[3]}', '{listValue[4]}', '{listValue[5]}', {idTrainee})")
                     countTrainee += 1
-                
+                cur.execute(f"UPDATE applications SET countEmployees = '{countTrainee}' WHERE id = {idApplication}")
             con.commit()
             return HttpResponseRedirect(f'/applications/list/clients?idApplication={idApplication}')
         elif value == "1":
@@ -317,7 +322,7 @@ def listClients(request):
             form = ApplicationsForm()
             return render(request, 'listClients.html',
                           {'form': form, 'formsClients': [],
-                           'allApplications': [id, f'{datetime.datetime.now()}', 0, 0, request.COOKIES.get('id')]})
+                           'allApplications': [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), 0, 0, request.COOKIES.get('id')]})
         allApplications = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
         
         allApplicationsForm = [allApplications[1]]+allApplications[5:7]
@@ -359,22 +364,22 @@ def installAccount(request, id):
         par6 = doc.add_paragraph(f"ИНН/КПП {data['inn']} / {data['kpp']}")
         par7 = doc.add_paragraph(f"Бик {data['bankAccount']}")
         supervisor = data['supervisor']
-    allUsers = cur.execute('SELECT prefStudyingProgram FROM trainee').fetchall()
+    allUsers = cur.execute(f'SELECT prefStudyingProgram FROM trainee WHERE id={id}').fetchall()
     allPrograms = [i[0] for i in allUsers]
-    reqText = 'SELECT name, price, prefix FROM studyingPrograms WHERE '
+    reqText = 'SELECT name, price, prefix, id FROM studyingPrograms WHERE '
     for i in allPrograms:
         reqText += f"id = '{i}' or "
     reqText = reqText[:-4]
     listPrograms = cur.execute(reqText).fetchall()
     setPrograms = set(allPrograms)
     table = doc.add_table(rows=len(setPrograms) + 2, cols=6)
-    table.style = 'Light Shading Accent 1'
+    table.style = 'Table Grid'
     summ = 0
     for program in range(len(listPrograms)):
         table.cell(program+1, 0).text = str(program+1)
         table.cell(program+1, 1).text = listPrograms[program][0]
         table.cell(program+1, 2).text = 'чел.'
-        countProg = allPrograms.count(listPrograms[program][-1])
+        countProg = allPrograms.count(str(listPrograms[program][-1]))
         table.cell(program+1, 3).text = str(countProg)
         table.cell(program+1, 4).text = str(listPrograms[program][1])
         table.cell(program+1, 5).text = str(int(listPrograms[program][1])*countProg)
@@ -390,12 +395,14 @@ def installAccount(request, id):
     table.cell(0, 5).text = 'Сумма, руб.'
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     response['Content-Disposition'] = ("attachment; filename="
-                                       + escape_uri_path(f'счёт {applicationOne[2]} от {datetime.datetime.now()}.docx'))
+                                       + escape_uri_path(f'счёт {applicationOne[2]} от {datetime.datetime.now().strftime("%d.%m.%Y %X")}.docx'))
     doc.save(response)
     con.commit()
     return response
 
 def protocols(request):
+    if not request.COOKIES.get('id'):
+        return HttpResponseRedirect('/login')
     import sqlite3
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
@@ -432,7 +439,7 @@ def protocolsClients(request):
             listClient1 = data[1:]
             return render(request, 'protocolsClients.html',
                           {'form': form1, 'formsClients': [],
-                           'allProtocols': [id, f'{datetime.datetime.now()}', request.COOKIES.get('id'), 0]})
+                           'allProtocols': [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
         form1 = ProtocolsForm(my_arg=data[:1])
         listClient1 = data[1:]
         formsClients1 = []
@@ -440,7 +447,7 @@ def protocolsClients(request):
             formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
         return render(request, 'protocolsClients.html',
                       {'form': form1, 'formsClients': formsClients1,
-                       'allProtocols': [id, f'{datetime.datetime.now()}', request.COOKIES.get('id'), 0]})
+                       'allProtocols': [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
     def addLine(listData1):
         clientID = \
         cur.execute(f"SELECT idClient FROM applications WHERE idTrainee = {listTrainee[trainee][0]}").fetchone()[0]
@@ -500,13 +507,17 @@ def protocolsClients(request):
             listTrainee = cur.execute(f"SELECT * FROM trainee WHERE prefStudyingProgram = {idStudyingProgram}").fetchall()
             listData1 = []
             for trainee in range(len(listTrainee)):
+                tf = True
                 traineeProtocols = cur.execute(f"SELECT * FROM protocolsClients WHERE fullName = "
-                                                +f"'{listTrainee[trainee][1]}' and snils = '{listTrainee[trainee][4]}' ").fetchone()
+                                                +f"'{listTrainee[trainee][1]}' and snils = '{listTrainee[trainee][4]}' ").fetchall()
                 if not traineeProtocols:
                     listData1 = addLine(listData1)
                 else:
-                    id2 = cur.execute(f"SELECT * FROM protocols WHERE id = {traineeProtocols[1]}").fetchone()[1]
-                    if str(id2) != str(idStudyingProgram):
+                    for traineeOne in traineeProtocols:
+                        id2 = cur.execute(f"SELECT idStudyingProgram FROM protocols WHERE id = {traineeOne[1]}").fetchone()[0]
+                        if str(id2) == str(idStudyingProgram):
+                            tf = False
+                    if tf:
                         listData1 = addLine(listData1)
             if listData1:
                 listData = listData[:1]

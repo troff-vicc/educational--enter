@@ -62,7 +62,7 @@ header {
     border-radius: 4px;
 }
 
-#div[name="on"] {
+div[name="on"] {
     background-color: #252C45;
 }
 
@@ -242,6 +242,34 @@ html{
             line-height: 16px;
             text-align: left;
         }
+    }
+    .container1{
+        margin-top: 20px;
+        #date, #autor, #status, #receiptPayment{
+            margin-left: 15px;
+        }
+        #count, #autor, #status{
+            .clientsData{
+                border: none;
+                width: 75px;
+            }
+            .label {
+                font-family: Roboto, serif;
+                font-size: 12px;
+                line-height: 14px;
+                text-align: left;
+            }
+        }
+
+        #date, #number{
+            margin-top: 0;
+        }
+    }
+    #formDiv{
+        height: 115px;
+        display: block;
+
+        margin-top: 20px;
     }
     #save{
         /* col_green */
