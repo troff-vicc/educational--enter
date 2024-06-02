@@ -2,6 +2,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.encoding import escape_uri_path
+from django.conf import settings
 from .forms import *
 
 def index(request):
@@ -118,6 +119,12 @@ def applicationsTranslate(listData, idUser = -1):
         listData[6] = boolVal[int(listData[6])]
         listData[8] = listUser[int(listData[8])]
         return listData
+    elif idUser == -2:
+        stat = ['Новый', 'Выставлен счет', 'Обучение частично', 'Выполнена']
+        listUser = [i[0] for i in cur.execute('SELECT name FROM users').fetchall()]
+        listData[2] = stat[int(listData[2])]
+        listData[4] = listUser[int(listData[4])]
+        return listData
     else:
         import datetime
         listData.insert(3, datetime.datetime.now().strftime('%d.%m.%Y %X'))
@@ -134,7 +141,7 @@ def protocolsTranslate(listData, idUser = -1):
     import datetime
     nameProgram = cur.execute(f'SELECT name FROM studyingPrograms where id = {listData[1]}').fetchone()[0]
     listData.insert(2, nameProgram)
-    listData.insert(3, datetime.datetime.now().strftime('%d.%m.%Y %X'))
+    listData.insert(3, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'))
     listData.insert(4, 1)
     listData.append(idUser)
     return listData
@@ -243,7 +250,8 @@ def listClients(request):
             formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
         
         allApplications1 = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
-        allApplications1 = [allApplications1[0]] + allApplications1[3:5] + allApplications1[7:]
+        allApplications1 = applicationsTranslate([allApplications1[0]] +
+                                                 allApplications1[3:5] + allApplications1[7:], -2)
         
         return render(request, 'listClients.html',
                       {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications1})
@@ -258,7 +266,8 @@ def listClients(request):
             formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
         
         id = len(cur.execute(f"SELECT * FROM applications").fetchall())
-        allApplications1 = [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), 0, 0, request.COOKIES.get('id')]
+        allApplications1 = applicationsTranslate([id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'),
+                                                  0, 0, request.COOKIES.get('id')], -2)
         
         return render(request, 'listClients.html',
                       {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications1})
@@ -312,6 +321,9 @@ def listClients(request):
         elif value == "1":
             for _ in range(6):
                 listData.append(None)
+        else:
+            idDel = int(value)-3
+            listData = listData[:6*idDel+3] + listData[6*(idDel+1)+3:]
         if idApplication == -1:
             return retNewRender(listData)
         return retRender(listData)
@@ -320,13 +332,16 @@ def listClients(request):
             import datetime
             id = len(cur.execute(f"SELECT * FROM applications").fetchall())
             form = ApplicationsForm()
+            applicationsList2 = applicationsTranslate([id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'),
+                                 0, 0, request.COOKIES.get('id')], -2)
+            
             return render(request, 'listClients.html',
                           {'form': form, 'formsClients': [],
-                           'allApplications': [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), 0, 0, request.COOKIES.get('id')]})
+                           'allApplications': applicationsList2})
         allApplications = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
         
         allApplicationsForm = [allApplications[1]]+allApplications[5:7]
-        allApplications = [allApplications[0]]+allApplications[3:5]+allApplications[7:]
+        allApplications = applicationsTranslate([allApplications[0]]+allApplications[3:5]+allApplications[7:], -2)
         
         form = ApplicationsForm(my_arg=allApplicationsForm)
         
@@ -335,7 +350,8 @@ def listClients(request):
         
         for i in range(len(listClient)):
             formsClients.append(ClientListForm(my_arg=listClient[i][1:], prefix=i))
-        return render(request, 'listClients.html', {'form': form, 'formsClients': formsClients, 'allApplications': allApplications})
+        return render(request, 'listClients.html', {'form': form, 'formsClients': formsClients,
+                                                    'allApplications': allApplications})
     
 def installAccount(request, id):
     import docx, sqlite3, json, datetime
@@ -395,7 +411,7 @@ def installAccount(request, id):
     table.cell(0, 5).text = 'Сумма, руб.'
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     response['Content-Disposition'] = ("attachment; filename="
-                                       + escape_uri_path(f'счёт {applicationOne[2]} от {datetime.datetime.now().strftime("%d.%m.%Y %X")}.docx'))
+                                       + escape_uri_path(f'счёт {applicationOne[2]} от {datetime.datetime.now(settings.TIME_DELTA).strftime("%d.%m.%Y %X")}.docx'))
     doc.save(response)
     con.commit()
     return response
@@ -439,7 +455,7 @@ def protocolsClients(request):
             listClient1 = data[1:]
             return render(request, 'protocolsClients.html',
                           {'form': form1, 'formsClients': [],
-                           'allProtocols': [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
+                           'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
         form1 = ProtocolsForm(my_arg=data[:1])
         listClient1 = data[1:]
         formsClients1 = []
@@ -447,7 +463,7 @@ def protocolsClients(request):
             formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
         return render(request, 'protocolsClients.html',
                       {'form': form1, 'formsClients': formsClients1,
-                       'allProtocols': [id, datetime.datetime.now().strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
+                       'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
     def addLine(listData1):
         clientID = \
         cur.execute(f"SELECT idClient FROM applications WHERE idTrainee = {listTrainee[trainee][0]}").fetchone()[0]
@@ -523,6 +539,9 @@ def protocolsClients(request):
                 listData = listData[:1]
                 for el in listData1:
                     listData.append(el)
+        else:
+            idDel = int(value)-3
+            listData = listData[:4*idDel+1] + listData[4*(idDel+1)+1:]
         con.commit()
         if idProtocols == -1:
             return retNewRender(listData)

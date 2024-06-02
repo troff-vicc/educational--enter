@@ -83,19 +83,34 @@
         </div>
     </div>
     <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
-    <table>
-    <tr id="headTr"><th>Имя</th><th>Звание</th><th>Пол</th><th>СНИЛС</th><th>Возраст</th><th>Программа</th></tr>
-    {% for formC in formsClients %}
-        <tr>
-            <th>{{formC.fullName}}</th>
-            <th>{{formC.post}}</th>
-            <th>{{formC.gender}}</th>
-            <th>{{formC.snils}}</th>
-            <th>{{formC.age}}</th>
-            <th>{{formC.prefStudyingProgram}}</th>
-        </tr>
-    {% endfor %}
-    </table>
+    <div id="table">
+        <table>
+        <tr id="headTr"><th>ФИО</th><th>Должность</th><th>Пол</th><th>СНИЛС</th><th>Возраст</th><th>Программа</th></tr>
+        {% for formC in formsClients %}
+            <tr>
+                <th>{{formC.fullName}}</th>
+                <th>{{formC.post}}</th>
+                <th>{{formC.gender}}</th>
+                <th>{{formC.snils}}</th>
+                <th>{{formC.age}}</th>
+                <th>{{formC.prefStudyingProgram}}</th>
+            </tr>
+        {% endfor %}
+        </table>
+        <div id="del">
+            {% for formC in formsClients %}
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" 
+                     xmlns="http://www.w3.org/2000/svg" onclick="delFunc({{ formC.prefix }});">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M7.5 14C11.0899 14
+                     14 11.0899 14 7.5C14 3.91015 11.0899 1 7.5 1C3.91015
+                      1 1 3.91015 1 7.5C1 11.0899 3.91015 14 7.5 14ZM7.5 15C11.6421
+                       15 15 11.6421 15 7.5C15 3.35786 11.6421 0 7.5 0C3.35786 0 0 3.35786
+                        0 7.5C0 11.6421 3.35786 15 7.5 15Z" fill="#FF4F4F"></path>
+                    <path d="M11 7V8L4 8L4 7L11 7Z" fill="#FF4F4F"></path>
+                </svg>
+            {% endfor %}
+        </div>
+    </div>
     <br>
     <input type="submit" id="save" value="Сохранить">
     <input type=hidden name=action id="action" value="0">
@@ -120,6 +135,13 @@
     function addFunc() {
         const action = document.getElementById("action")
         action.value = "1"
+    }
+    
+    function delFunc(id) {
+        const action = document.getElementById("action")
+        const form = document.getElementById("inputForm")
+        action.value = String(3 + Number(id))
+        form.submit()
     }
 </script>
 </html>

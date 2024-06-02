@@ -95,6 +95,23 @@ html{
     }
 } /*main*/
 html{
+    #table{
+        #del{
+            display: flex;
+            flex-flow: row wrap;
+            margin-left: 5px;
+            width: 15px;
+            margin-top: 46px;
+            height: 0;
+            svg{
+                margin-top: 15px;
+                margin-bottom: 15px;
+            }
+        }
+        display: flex;
+        margin-top: 4px;
+    }
+
     #add {
         border: 2px solid #59CC47;
         border-radius: 100%;
@@ -159,7 +176,7 @@ html{
             border-radius: 4px;
             }
 
-        margin-top: 4px;
+        /*margin-top: 4px;*/
 
         border-collapse: collapse;
         border: 1px solid #C4C4C4;
@@ -169,7 +186,7 @@ html{
     form{
         display: block;
     }
-    form div{
+    form div:not(#table, #del, #formDiv){
         display: flex;
         align-items: center;
 
@@ -252,6 +269,11 @@ html{
             .clientsData{
                 border: none;
                 width: 75px;
+
+                font-family: Roboto, serif;
+                font-size: 13px;
+                line-height: 14px;
+                text-align: left;
             }
             .label {
                 font-family: Roboto, serif;
