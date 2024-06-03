@@ -48,7 +48,12 @@
 <main>
     <form method="post" id="inputForm" novalidate>
         {% csrf_token %}
-        {{ form }}
+        {% for form1 in form %}
+            <div>
+                {{ form1.label_tag }}
+                {{ form1 }}
+            </div>
+        {% endfor %}
         <input type="submit" id="save" value="Сохранить">
         <p id="error">{{ invalid }}<p>
     </form>
