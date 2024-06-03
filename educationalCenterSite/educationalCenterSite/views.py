@@ -359,7 +359,9 @@ def installAccount(request, id):
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
     
-    cur.execute(f'''update applications set status = 1 where id = {id}''')
+    stat = cur.execute(f"select status from applications where id = {id}").fetchone()[0]
+    if str(stat) == '0':
+        cur.execute(f'''update applications set status = 1 where id = {id}''')
     
     applicationOne = cur.execute(f'SELECT * FROM applications where id = {id}').fetchone()
     client = cur.execute(f'SELECT * FROM clients where id = {applicationOne[-1]}').fetchone()
@@ -412,6 +414,68 @@ def installAccount(request, id):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     response['Content-Disposition'] = ("attachment; filename="
                                        + escape_uri_path(f'счёт {applicationOne[2]} от {datetime.datetime.now(settings.TIME_DELTA).strftime("%d.%m.%Y %X")}.docx'))
+    doc.save(response)
+    con.commit()
+    return response
+
+def installProtocols(request, id):
+    import docx, sqlite3
+    doc = docx.Document()
+    con = sqlite3.connect('educationalDate.db')
+    cur = con.cursor()
+    
+    def transProt(word, idWord):
+        if idWord == 0:
+            return cur.execute(f'select name from clients where id = {word}').fetchone()[0]
+        stat = ['Зачет', 'Незачет', 'Пропуск']
+        return stat[word]
+    
+    protocol = cur.execute(f'SELECT * FROM protocols WHERE id={id}').fetchone()
+    program = cur.execute(f'SELECT * FROM studyingPrograms WHERE id={protocol[1]}').fetchone()
+    protocolClients = cur.execute(f'SELECT * FROM protocolsClients WHERE idProtocols={id}').fetchall()
+    
+    name = f'Протокол №{id} от {protocol[3]}'
+    h = doc.add_paragraph(name)
+    h.bold = True
+    h.alignment = 0
+    doc.add_paragraph(program[6])
+    #table
+    listN = ['ФИО', 'Клиент', 'СНИЛС', 'Номер реестра',
+             'Результат проведения', 'Подпись']
+    listCol = []
+    col1 = 1
+    for prog in range(len(program[8:])):
+        if str(program[8+prog]) == '1':
+            col1 += 1
+            listCol.append(listN[prog])
+    table = doc.add_table(rows=len(protocolClients)+1, cols=col1)
+    table.style = 'Table Grid'
+    
+    table.cell(0, 0).text = ''
+    for col in range(len(listCol)):
+        table.cell(0, col+1).text = listCol[col]
+    for client in range(len(protocolClients)):
+        for col in range(len(listCol)+1):
+            if col == len(listCol):
+                table.cell(client + 1, 0).text = str(protocolClients[client][0])
+            elif listCol[col] == 'ФИО':
+                table.cell(client + 1, col+1).text = str(protocolClients[client][2])
+            elif listCol[col] == 'Клиент':
+                table.cell(client + 1, col+1).text = transProt(protocolClients[client][3],
+                                                               0)
+            elif listCol[col] == 'Номер реестра':
+                table.cell(client + 1, col+1).text = ''
+            elif listCol[col] == 'Результат проведения':
+                table.cell(client + 1, col+1).text = transProt(protocolClients[client][5],
+                                                               1)
+            elif listCol[col] == 'Подпись':
+                table.cell(client + 1, col+1).text = ''
+    response = HttpResponse(content_type='application/vnd.openxmlformats-'
+                                         'officedocument.wordprocessingml.document')
+    response['Content-Disposition'] = ("attachment; filename="
+                                       + escape_uri_path(
+                f'Протокол от '
+                f'{name}.docx'))
     doc.save(response)
     con.commit()
     return response

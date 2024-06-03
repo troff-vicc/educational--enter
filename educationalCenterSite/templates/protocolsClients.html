@@ -46,6 +46,14 @@
 </header>
 <!--<form action=""><input type=hidden name=id value={{allApplications.0}}><button>Счёт</button></form>-->
 <main>
+<a href="{% url 'installProtocols' allProtocols.0 %}" download="1" id="score">
+    <svg width="15" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M13.4854 1H1.48535V15.5L4.98535 14L7.48535 16L9.98535 14L13.4854 15.5V1Z" stroke="#303956" stroke-width="2"></path>
+    <path d="M3.48535 5H11.4854" stroke="#303956" stroke-width="2"></path>
+    <path d="M3.48535 9H11.4854" stroke="#303956" stroke-width="2"></path>
+    </svg>
+    <p>Протокол</p>
+</a>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
     <div class="container1">
