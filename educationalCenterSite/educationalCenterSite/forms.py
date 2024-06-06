@@ -1,5 +1,5 @@
 from django import forms
-
+from formset.widgets import DateInput
 class LoginForm(forms.Form):
     name = forms.CharField(label_suffix=False, label='', max_length=50,
                            widget=forms.TextInput(attrs={'placeholder': 'Логин',
@@ -230,3 +230,7 @@ class CompanyForm(forms.Form):
             self.fields['supervisor'].widget = forms.TextInput(attrs={'value': my_arg[5]})
         else:
             super(CompanyForm, self).__init__(*args, **kwargs)
+            
+class ReportsForm(forms.Form):
+    dateROt = forms.DateField(label='Дата от', widget=DateInput)
+    dateRDo = forms.DateField(label='Дата до', widget=DateInput)

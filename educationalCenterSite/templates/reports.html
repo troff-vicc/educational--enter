@@ -8,7 +8,7 @@
 </head>
 <body>
 <header>
-    <div class="headEl" id="referenceInformation" name="on">
+    <div class="headEl" id="referenceInformation" >
         <a href="{% url 'referenceInformation' %}">
             <svg width="14" height="17" viewBox="0 0 14 17" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path fill-rule="evenodd" clip-rule="evenodd" 
@@ -44,7 +44,7 @@
             <p>Протоколы</p>
         </a>
     </div>
-    <div class="headEl" id="reports">
+    <div class="headEl" id="reports" name="on">
         <a href="{% url 'reports' %}">
             <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12.4854 6V2H6.48535V1H1.48535V12" stroke="#FFFFFF" stroke-width="2"></path>
@@ -57,12 +57,7 @@
 <main>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
-    <table>
-        <tr id="headTr"><th>Номер</th><th>Имя</th><th>Пароль</th><th>Администратор</th></tr>
-        {% for user in allUsers %}
-            <tr id="{{user.0}}"><th>{{user.0}}</th><th>{{user.1}}</th><th>{{user.2}}</th><th>{{user.3.admin}}</th></tr>
-        {% endfor %}
-    </table>
+    {{ form }}
     <input type="submit" id="save" value="Сохранить">
 </form>
 </main>

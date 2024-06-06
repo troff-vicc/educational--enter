@@ -527,7 +527,8 @@ def protocolsClients(request):
             formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
         return render(request, 'protocolsClients.html',
                       {'form': form1, 'formsClients': formsClients1,
-                       'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
+                       'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'),
+                                        request.COOKIES.get('id'), 0]})
     def addLine(listData1):
         clientID = \
         cur.execute(f"SELECT idClient FROM applications WHERE idTrainee = {listTrainee[trainee][0]}").fetchone()[0]
@@ -646,3 +647,97 @@ def company(request):
             data = list(json.load(json_file).values())
         form = CompanyForm(my_arg=data)
         return render(request, 'company.html', {'form': form})
+
+
+def reports(request):
+    if request.method == 'POST':
+        import datetime, sqlite3, docx
+        con = sqlite3.connect('educationalDate.db')
+        cur = con.cursor()
+        
+        listData = list(request.POST.values())[1:]
+        dateOt = datetime.datetime.strptime(listData[0], '%Y-%m-%d')
+        dateDo = datetime.datetime.strptime(listData[1], '%Y-%m-%d')
+        
+        protocol = cur.execute(f'SELECT * FROM protocols').fetchall()
+        trueProtocols = []
+        for one in protocol:
+            if dateOt < datetime.datetime.strptime(one[3], '%d.%m.%Y %X') < dateDo:
+                groupProt = cur.execute(f'SELECT idGroupReports FROM studyingPrograms WHERE id={one[1]}').fetchone()[0]
+                if len(trueProtocols) < groupProt+1:
+                    trueProtocols.append([one])
+                else:
+                    trueProtocols[groupProt].append(one)
+        doc = docx.Document()
+        h = doc.add_paragraph('Распределение персонала по возрасту и полу')
+        h2 = doc.add_paragraph('Распределение персонала без внешних внешних совместителей работающих'
+                               ' по договорам гражданско-правового характера по возрасту и полу')
+        h.bold = True
+        h.alignment = 0
+        h2.bold = True
+        h2.alignment = 0
+        
+        #table
+        table = doc.add_table(rows=len(trueProtocols) + 3, cols=11)
+        table.style = 'Table Grid'
+        table.cell(0, 0).merge(table.cell(2, 0))
+        table.cell(0, 0).text = ''
+        table.cell(0, 1).merge(table.cell(0, 10))
+        table.cell(0, 1).text = 'Число полных лет по состоянию на конец отчётного года'
+        table.cell(1, 1).merge(table.cell(1, 2))
+        table.cell(1, 1).text = 'моложе 25 лет'
+        table.cell(1, 3).merge(table.cell(1, 4))
+        table.cell(1, 3).text = '25-29'
+        table.cell(1, 5).merge(table.cell(1, 6))
+        table.cell(1, 5).text = '30-34'
+        table.cell(1, 7).merge(table.cell(1, 8))
+        table.cell(1, 7).text = '35-39'
+        table.cell(1, 9).merge(table.cell(1, 10))
+        table.cell(1, 9).text = '40-44'
+        for j in range(1, 10, 2):
+            table.cell(2, j).text = 'всего'
+            table.cell(2, j+1).text = 'из них женщин'
+        for protInd in range(len(trueProtocols)):
+            table.cell(3+protInd, 0).text = str(protInd)
+            for protInd2 in trueProtocols[protInd]:
+                protocolClient2 = cur.execute(f"SELECT * FROM protocolsClients WHERE idProtocols='{protInd2[0]}'").fetchall()
+                for protInd1 in protocolClient2:
+                    ageGender = cur.execute(f"SELECT age, gender FROM trainee WHERE fullName = "
+                                        +f"'{protInd1[2]}' and snils = '{protInd1[4]}' ").fetchone()
+                    age = ageGender[0]
+                    gender = ageGender[1]
+                    listCount = [0]*10
+                    if int(age) < 25:
+                        listCount[0] += 1
+                        if gender == 1:
+                            listCount[1] += 1
+                    elif int(age) < 30:
+                        listCount[2] += 1
+                        if gender == 1:
+                            listCount[3] += 1
+                    elif int(age) < 35:
+                        listCount[4] += 1
+                        if gender == 1:
+                            listCount[5] += 1
+                    elif int(age) < 40:
+                        listCount[6] += 1
+                        if gender == 1:
+                            listCount[7] += 1
+                    elif int(age) < 45:
+                        listCount[8] += 1
+                        if gender == 1:
+                            listCount[9] += 1
+                    for x in range(len(listCount)):
+                        table.cell(3 + protInd, x+1).text = str(listCount[x])
+        response = HttpResponse(content_type='application/vnd.openxmlformats-'
+                                             'officedocument.wordprocessingml.document')
+        response['Content-Disposition'] = ("attachment; filename="
+                                           + escape_uri_path(
+                    f'Отчёт от '
+                    f'{dateOt} до {dateDo}.docx'))
+        doc.save(response)
+        con.commit()
+        return response
+    else:
+        form = ReportsForm()
+        return render(request, 'reports.html', {'form': form})
