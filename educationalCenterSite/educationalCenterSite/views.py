@@ -515,7 +515,7 @@ def installProtocolsXML(request, id):
         MiddleName = nameCli[secSp+1:] if secSp != -1 else ''
         Snils = prot[4]
         trainee = cur.execute(f'SELECT * FROM trainee WHERE snils={Snils}').fetchone()
-        Position = trainee[2] if trainee != [] else ''
+        Position = trainee[2] if trainee else ''
         client = cur.execute(f'SELECT * FROM clients WHERE id={prot[3]}').fetchone()
         EmployerInn = client[2]
         EmployerTitle = client[1]
