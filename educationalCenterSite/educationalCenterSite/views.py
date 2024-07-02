@@ -463,6 +463,8 @@ def installProtocols(request, id):
             elif listCol[col] == 'Клиент':
                 table.cell(client + 1, col+1).text = transProt(protocolClients[client][3],
                                                                0)
+            elif listCol[col] == 'СНИЛС':
+                table.cell(client + 1, col+1).text = str(protocolClients[client][4])
             elif listCol[col] == 'Номер реестра':
                 table.cell(client + 1, col+1).text = ''
             elif listCol[col] == 'Результат проведения':
@@ -474,12 +476,71 @@ def installProtocols(request, id):
                                          'officedocument.wordprocessingml.document')
     response['Content-Disposition'] = ("attachment; filename="
                                        + escape_uri_path(
-                f'Протокол от '
                 f'{name}.docx'))
     doc.save(response)
     con.commit()
     return response
 
+def installProtocolsXML(request, id):
+    import sqlite3, bs4, json
+    con = sqlite3.connect('educationalDate.db')
+    cur = con.cursor()
+    bodyXml = '''<?xml version='1.0' encoding='utf-8'?>
+                                <RegistrySet xsi:noNamespaceSchemaLocation='schema.xsd'
+                                 xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+                                '''
+    protocol = cur.execute(f'SELECT * FROM protocols WHERE id={id}').fetchone()
+    program = cur.execute(f'SELECT * FROM studyingPrograms WHERE id={protocol[1]}').fetchone()
+    protocolClients = cur.execute(f'SELECT * FROM protocolsClients WHERE idProtocols={id}').fetchall()
+    name = f'xml Протокол №{id} от {protocol[3]}'
+    
+    with open('company.json') as json_file:
+        data = json.load(json_file)
+        Organization = f'''<Organization>
+                        <Inn>{data['inn']}</Inn>
+                        <Title>{data['name']}</Title>
+                    </Organization>'''
+    Test = f'''<Test isPassed="true" learnProgramId="1">
+                    <Date>{protocol[3]}</Date>
+                    <ProtocolNumber>{id}</ProtocolNumber>
+                    <LearnProgramTitle>{protocol[2]}</LearnProgramTitle>
+                </Test>'''
+    for prot in protocolClients:
+        RegistryRecord = "<RegistryRecord>"
+        nameCli = prot[2]
+        firstSp = nameCli.find(' ')
+        LastName = nameCli[:firstSp] if firstSp != -1 else nameCli
+        secSp = nameCli[firstSp+1:].find(' ')
+        FirstName = nameCli[firstSp+1:secSp] if secSp != -1 else nameCli[firstSp+1:]
+        MiddleName = nameCli[secSp+1:] if secSp != -1 else ''
+        Snils = prot[4]
+        trainee = cur.execute(f'SELECT * FROM trainee WHERE snils={Snils}').fetchone()
+        Position = trainee[2] if trainee != [] else ''
+        client = cur.execute(f'SELECT * FROM clients WHERE id={prot[3]}').fetchone()
+        EmployerInn = client[2]
+        EmployerTitle = client[1]
+        addWork =   f'''
+        <Worker>
+            <LastName>{LastName}</LastName>
+            <FirstName>{FirstName}</FirstName>
+            <MiddleName>{MiddleName}</MiddleName>
+            <Snils>{Snils}</Snils>
+            <Position>{Position}</Position>
+            <EmployerInn>{EmployerInn}</EmployerInn>
+            <EmployerTitle>{EmployerTitle}</EmployerTitle>
+        </Worker>
+                    '''
+        RegistryRecord += addWork
+        RegistryRecord += Organization
+        RegistryRecord += Test
+        RegistryRecord += '</RegistryRecord>'
+        bodyXml += RegistryRecord
+    bodyXml += '</RegistrySet>'
+    
+    response = HttpResponse(bodyXml, content_type='application/xml')
+    response['Content-Disposition'] = 'attachment; filename=' + escape_uri_path(
+                f'{name}.xml')
+    return response
 def protocols(request):
     if not request.COOKIES.get('id'):
         return HttpResponseRedirect('/login')
@@ -648,7 +709,6 @@ def company(request):
         form = CompanyForm(my_arg=data)
         return render(request, 'company.html', {'form': form})
 
-
 def reports(request):
     if request.method == 'POST':
         import datetime, sqlite3, docx
@@ -656,6 +716,10 @@ def reports(request):
         cur = con.cursor()
         
         listData = list(request.POST.values())[1:]
+        if '' in listData:
+            form = ReportsForm()
+            return render(request, 'reports.html',
+                          {'form': form, 'out':'Заполните все поля'})
         dateOt = datetime.datetime.strptime(listData[0], '%Y-%m-%d')
         dateDo = datetime.datetime.strptime(listData[1], '%Y-%m-%d')
         
@@ -699,14 +763,17 @@ def reports(request):
             table.cell(2, j+1).text = 'из них женщин'
         for protInd in range(len(trueProtocols)):
             table.cell(3+protInd, 0).text = str(protInd)
+            listCount = [0] * 10
             for protInd2 in trueProtocols[protInd]:
                 protocolClient2 = cur.execute(f"SELECT * FROM protocolsClients WHERE idProtocols='{protInd2[0]}'").fetchall()
                 for protInd1 in protocolClient2:
                     ageGender = cur.execute(f"SELECT age, gender FROM trainee WHERE fullName = "
                                         +f"'{protInd1[2]}' and snils = '{protInd1[4]}' ").fetchone()
+                    if not ageGender:
+                        continue
                     age = ageGender[0]
                     gender = ageGender[1]
-                    listCount = [0]*10
+                    
                     if int(age) < 25:
                         listCount[0] += 1
                         if gender == 1:

@@ -72,19 +72,22 @@ html{
     main{
         padding: 0 40px;
     }
-    #score{
+    #container3{
+        display: flex;
+    }
+    .score{
         margin-top: 20px;
 
         display: flex;
         align-items: center;
 
-        width: 48px;
+        width: 100px;
         height: 16px;
 
         text-decoration: none;
         svg{
-            min-width: 12px;
-            min-height: 15px;
+            min-width: 15px;
+            min-height: 18px;
         }
         p{
             margin-left: 4px;

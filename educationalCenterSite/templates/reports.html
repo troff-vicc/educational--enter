@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Пользователи</title>
-    <link rel="stylesheet" href="{% static 'css/cssTemplatesTable.css' %}">
+    <link rel="stylesheet" href="{% static 'css/cssTemplatesForm.css' %}">
 </head>
 <body>
 <header>
@@ -58,8 +58,9 @@
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
     {{ form }}
-    <input type="submit" id="save" value="Сохранить">
+    <input type="submit" id="save" value="Скачать">
 </form>
+<p id="error">{{ out }}</p>
 </main>
 <script src="{% static 'js/jsTemplatesTable.js' %}"></script>
 </body>

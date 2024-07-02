@@ -35,6 +35,7 @@ urlpatterns = [
     path('applications/list/clients', views.listClients, name='applicationsListClients'),
     path('applications/list/install/<int:id>', views.installAccount, name='installAccount'),
     path('protocols/install/<int:id>', views.installProtocols, name='installProtocols'),
+    path('protocols/installXml/<int:id>', views.installProtocolsXML, name='installProtocolsXML'),
     path('protocols/clients', views.protocolsClients, name='protocolsClient'),
     path('reports/', views.reports, name='reports'),
     path('add/', views.add, name='add'),
