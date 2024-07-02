@@ -482,7 +482,7 @@ def installProtocols(request, id):
     return response
 
 def installProtocolsXML(request, id):
-    import sqlite3, bs4, json
+    import sqlite3, json
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
     bodyXml = '''<?xml version='1.0' encoding='utf-8'?>
@@ -541,6 +541,7 @@ def installProtocolsXML(request, id):
     response['Content-Disposition'] = 'attachment; filename=' + escape_uri_path(
                 f'{name}.xml')
     return response
+
 def protocols(request):
     if not request.COOKIES.get('id'):
         return HttpResponseRedirect('/login')
