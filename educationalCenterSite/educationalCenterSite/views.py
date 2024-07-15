@@ -11,12 +11,26 @@ def index(request):
 def information(request):
     if not request.COOKIES.get('id'):
         return HttpResponseRedirect('/login')
-    return render(request, 'information.html')
+    else:
+        import sqlite3
+        con = sqlite3.connect('educationalDate.db')
+        cur = con.cursor()
+        isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}")
+        if str(isAdmin) == '1':
+            return render(request, 'information.html')
+        else:
+            return render(request, 'information1.html')
 
 def users(request):
-    import sqlite3
-    con = sqlite3.connect('educationalDate.db')
-    cur = con.cursor()
+    if not request.COOKIES.get('id'):
+        return HttpResponseRedirect('/login')
+    else:
+        import sqlite3
+        con = sqlite3.connect('educationalDate.db')
+        cur = con.cursor()
+        isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}")
+        if str(isAdmin) != '1':
+            return HttpResponseRedirect('/information')
     if request.method == 'POST':
         allUsers = cur.execute('SELECT id FROM users').fetchall()
         listData = [int(i[0])-1 for i in list(request.POST.keys())[1:]]
@@ -234,12 +248,143 @@ def applicationsList(request):
         nList.append(applicationsTranslate(list(allApplications[i])))
     return render(request, 'applicationsList.html', {'allApplications': nList})
 
+def listClientsNoAdmin(request):
+    z = request.GET.get('idApplication')
+    idApplication = -1 if z == "new" else int(z)
+    import sqlite3
+    con = sqlite3.connect('educationalDate.db')
+    cur = con.cursor()
+    
+    boolFields = ['Нет', 'Да']
+    
+    def retRender(date):
+        form1 = ApplicationsFormNoAdmin(my_arg=date[0])
+        
+        nDate = date[3:]
+        formsClients1 = []
+        for i in range(len(nDate) // 6):
+            listValues = nDate[i * 6:(i + 1) * 6]
+            formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
+        
+        allApplications2 = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
+        allApplications3 = applicationsTranslate([allApplications2[0]] +
+                                                 allApplications2[3:5] + allApplications2[7:], -2)
+        allApplications3 = allApplications3 + [boolFields[int(allApplications2[5])],
+                                               boolFields[int(allApplications2[6])]]
+        return render(request, 'listClients.html',
+                      {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications3})
+    
+    def retNewRender(date):
+        import datetime
+        form1 = ApplicationsFormNoAdmin(my_arg=date[0])
+        
+        nDate = date[3:]
+        formsClients1 = []
+        for i in range(len(nDate) // 6):
+            listValues = nDate[i * 6:(i + 1) * 6]
+            formsClients1.append(ClientListForm(my_arg=listValues, prefix=i))
+        
+        id = len(cur.execute(f"SELECT * FROM applications").fetchall())
+        allApplications3 = applicationsTranslate(
+            [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'),
+             0, 0, request.COOKIES.get('id')], -2)
+        allApplications3 = allApplications3 + [boolFields[0],
+                                               boolFields[0]]
+        return render(request, 'listClients.html',
+                      {'form': form1, 'formsClients': formsClients1, 'allApplications': allApplications3})
+    
+    if request.method == 'POST':
+        listData = list(request.POST.values())[1:]
+        applications = listData[0]
+        value = listData[-1]
+        listData = listData[:-1]
+        
+        if value == "0":
+            listData = listData[1:]
+            nameClient = cur.execute(f'SELECT name FROM clients where id = {applications[0]}').fetchone()[0]
+            applications.insert(1, nameClient)
+            
+            if idApplication == -1:
+                id = len(cur.execute(f"SELECT * FROM applications").fetchall())
+                listData2 = tuple(
+                    applicationsTranslate(([id] + applications + [0, 0]), request.COOKIES.get('id')))
+                cur.execute(f'''INSERT INTO applications VALUES(?,?,?,?,?,?,?,?,?,?)''', listData2)
+                
+                countTrainee = 0
+                for i in range(len(listData) // 6):
+                    listValue = listData[i * 6:(i + 1) * 6]
+                    idTrainee = i
+                    
+                    cur.execute(f'INSERT INTO trainee values '
+                                + f"({id}, '{listValue[0]}', '{listValue[1]}', "
+                                  f"'{listValue[2]}', '{listValue[3]}', '{listValue[4]}', "
+                                  f"'{listValue[5]}', {idTrainee})")
+                    countTrainee += 1
+                idApplication = id
+            else:
+                cur.execute(
+                    f'update applications set idClient = ?, nameClient = ? where id = {idApplication}',
+                    tuple(applications))
+                
+                countTrainee = 0
+                cur.execute(f"DELETE FROM trainee WHERE id={idApplication}")
+                for i in range(len(listData) // 6):
+                    listValue = listData[i * 6:(i + 1) * 6]
+                    idr = cur.execute(f'SELECT MAX(idInd) FROM trainee WHERE id = {idApplication}').fetchone()[0]
+                    idTrainee = int(idr if isinstance(idr, int) else -1) + 1
+                    cur.execute(f'INSERT INTO trainee values '
+                                + f"({idApplication}, '{listValue[0]}', '{listValue[1]}', "
+                                + f"'{listValue[2]}', '{listValue[3]}', '{listValue[4]}', '{listValue[5]}', {idTrainee})")
+                    countTrainee += 1
+                cur.execute(f"UPDATE applications SET countEmployees = '{countTrainee}' WHERE id = {idApplication}")
+            con.commit()
+            return HttpResponseRedirect(f'/applications/list/clients?idApplication={idApplication}')
+        elif value == "1":
+            for _ in range(6):
+                listData.append(None)
+        else:
+            idDel = int(value) - 3
+            listData = listData[:6 * idDel + 3] + listData[6 * (idDel + 1) + 3:]
+        if idApplication == -1:
+            return retNewRender(listData)
+        return retRender(listData)
+    else:
+        if idApplication == -1:
+            import datetime
+            id = len(cur.execute(f"SELECT * FROM applications").fetchall())
+            form = ApplicationsFormNoAdmin()
+            applicationsList2 = applicationsTranslate(
+                [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'),
+                 0, 0, request.COOKIES.get('id')], -2)
+            
+            return render(request, 'listClients.html',
+                          {'form': form, 'formsClients': [],
+                           'allApplications': applicationsList2})
+        allApplications1 = list(cur.execute(f'SELECT * FROM applications where id = {idApplication}').fetchone())
+        
+        allApplicationsForm = [allApplications1[1]]
+        allApplications = applicationsTranslate([allApplications1[0]] + allApplications1[3:5] + allApplications1[7:], -2)
+        allApplications = allApplications + [boolFields[int(allApplications1[5])], boolFields[int(allApplications1[6])]]
+        form = ApplicationsFormNoAdmin(my_arg=allApplicationsForm)
+        
+        listClient = list(cur.execute(f'SELECT * FROM trainee where id = {allApplications1[-1]}').fetchall())
+        formsClients = []
+        
+        for i in range(len(listClient)):
+            formsClients.append(ClientListForm(my_arg=listClient[i][1:], prefix=i))
+        return render(request, 'listClients1.html', {'form': form, 'formsClients': formsClients,
+                                                    'allApplications': allApplications})
+
 def listClients(request):
     z = request.GET.get('idApplication')
     idApplication = -1 if z == "new" else int(z)
     import sqlite3
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
+    
+    isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}")
+    if str(isAdmin) != '1':
+        return listClientsNoAdmin(request)
     def retRender(date):
         form1 = ApplicationsForm(my_arg=date[:3])
         
@@ -548,13 +693,18 @@ def protocols(request):
     import sqlite3
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
-    allProtocols = cur.execute('SELECT * FROM protocols').fetchall()
-    nList = []
-    for protocol in range(len(allProtocols)):
-        listR = list(allProtocols[protocol])
-        listR[5] = (cur.execute(f'select name from users where id = {listR[5]}').fetchone()[0])
-        nList.append(listR)
-    return render(request, 'protocols.html', {'allProtocols': nList})
+    if request.method == 'POST':
+        listData = list(request.POST.values())[1].lower()
+        return HttpResponseRedirect(f'/protocols/search?request={listData}')
+    else:
+        form = SearchProtocols(request.POST)
+        allProtocols = cur.execute('SELECT * FROM protocols').fetchall()
+        nList = []
+        for protocol in range(len(allProtocols)):
+            listR = list(allProtocols[protocol])
+            listR[5] = (cur.execute(f'select name from users where id = {listR[5]}').fetchone()[0])
+            nList.append(listR[:-1])
+        return render(request, 'protocols.html', {'allProtocols': nList, 'form': form})
 
 def protocolsClients(request):
     z = request.GET.get('id')
@@ -603,8 +753,12 @@ def protocolsClients(request):
         listData = listData[:-1]
         protocol = [listData[0]]
         if value == "0":
-            nameClient = cur.execute(f'SELECT name FROM studyingPrograms where id = {protocol[0]}').fetchone()[0]
-            protocol.append(nameClient)
+            nameClient = cur.execute(f'SELECT name, textForReport FROM studyingPrograms where id = {protocol[0]}').fetchone()
+            protocol.append(nameClient[0])
+            des = listData[1]
+            if listData[1] == '':
+                des = nameClient[1]
+            protocol.append(des)
             if idProtocols == -1:
                 idProtocols = len(cur.execute(f"SELECT * FROM protocols").fetchall())
                 listData1 = tuple(
@@ -624,20 +778,22 @@ def protocolsClients(request):
                 cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
             else:
                 cur.execute(
-                    f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ? where id = {idProtocols}',
+                    f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ?, description = ?'
+                    f' where id = {idProtocols}',
                     tuple(protocol)
                 )
                 
                 cur.execute(f"DELETE FROM protocolsClients WHERE idProtocols={idProtocols}")
                 countTrainee = 0
-                listData = listData[1:]
+                listData = listData[2:]
                 for i in range(len(listData) // 4):
                     listValue = listData[i * 4:(i + 1) * 4]
                     idr = cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
                     idTrainee = int(idr if isinstance(idr, int) else -1) + 1
                     
                     cur.execute(f'INSERT INTO protocolsClients values'+
-                    f"({idTrainee}, {idProtocols}, '{listValue[0]}', {listValue[1]}, '{listValue[2]}', '{listValue[3]}', NULL)")
+                    f"({idTrainee}, {idProtocols}, '{listValue[0]}', {listValue[1]}, '{listValue[2]}',"
+                    f" '{listValue[3]}', NULL)")
                     countTrainee += 1
                 cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
             con.commit()
@@ -678,7 +834,7 @@ def protocolsClients(request):
             return retNewRender([])
         allProtocols = list(cur.execute(f"SELECT * FROM protocols where id = '{idProtocols}'").fetchone())
         allProtocols[5] = cur.execute(f"select name from users where id = '{allProtocols[5]}'").fetchone()[0]
-        allApplicationsForm = [allProtocols[1]]
+        allApplicationsForm = [allProtocols[1]]+[allProtocols[6]]
         allProtocols = [allProtocols[0]] + allProtocols[3:]
         form = ProtocolsForm(my_arg=allApplicationsForm)
         listClient = list(cur.execute(f'SELECT * FROM protocolsClients where idProtocols = {allProtocols[0]}').fetchall())
@@ -809,3 +965,28 @@ def reports(request):
     else:
         form = ReportsForm()
         return render(request, 'reports.html', {'form': form})
+
+def protocolsSearch(request):
+    import sqlite3
+    con = sqlite3.connect('educationalDate.db')
+    cur = con.cursor()
+    if request.method == 'POST':
+        listData = list(request.POST.values())[1].lower()
+        return HttpResponseRedirect(f'/protocols/search?request={listData}')
+    else:
+        listData = request.GET.get('request')
+        form = SearchProtocols(my_arg=listData)
+        protocolsClientsAll = cur.execute('SELECT idProtocols, fullName, idClient FROM protocolsClients').fetchall()
+        allListData = []
+        for oneHuman in protocolsClientsAll:
+            nameClient = cur.execute(f'SELECT name FROM clients WHERE id={oneHuman[2]}').fetchone()
+            allListData.append([oneHuman[0]] + list(map(lambda x: x.lower(), oneHuman[1].split())) + list(nameClient))
+        listOut = []
+        for allData in range(len(allListData)):
+            print(allListData[allData])
+            for w in allListData[allData][1:]:
+                if listData == w[:len(listData)]:
+                    listOut.append(allListData[allData])
+                    break
+        listOut = list(listOut)
+        return render(request, 'searchProtocols.html', {'form': form, 'listOut': listOut})

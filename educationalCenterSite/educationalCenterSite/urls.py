@@ -40,4 +40,5 @@ urlpatterns = [
     path('reports/', views.reports, name='reports'),
     path('add/', views.add, name='add'),
     path('edit/', views.edit, name='edit'),
+    path('protocols/search', views.protocolsSearch, name='protocolsSearch')
 ]

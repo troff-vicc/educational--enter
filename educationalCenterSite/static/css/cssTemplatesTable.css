@@ -113,7 +113,7 @@ html{
         border-collapse: collapse;
         border: 1px solid #C4C4C4;
     }
-        #save{
+    #save{
         /* col_green */
 
         width: 102px;
@@ -131,4 +131,21 @@ html{
 
         margin-top: 10px;
     }
+    form{
+    #id_name{
+        height:30px;
+        background-color: white;
+        margin-left:15px;
+        width:514px;
+        border: 1px solid #bdbdbd;
+        padding: .375rem .75rem;
+        border-radius: .25rem;
+        outline: none;
+        font-size: 25px;
+        border-right: none;
+
+    }
+    display: flex;
+    margin-top:35px;
+}
 } /*main*/

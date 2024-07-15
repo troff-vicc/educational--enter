@@ -11,64 +11,6 @@ html, body {
 }
 
 html{
-header {
-    background-color: #303956;
-    float: left;
-    height: 100vh;
-    width: 176px;
-
-    position: sticky;
-    top: 0;
-}
-
-.headEl {
-    a {
-        display: flex;
-        align-items: center;
-
-        width: 160px;
-        height: 48px;
-
-        text-decoration: none;
-
-        svg {
-            margin-left: 16px;
-            min-height: 17px;
-            min-width: 14px;
-        }
-
-        p {
-            margin-left: 19px;
-
-            font-family: Roboto, serif;
-            text-transform: uppercase;
-
-            color: #FFFFFF;
-            font-size: 10px;
-            line-height: 12px;
-            letter-spacing: 0.05em;
-            text-align: left;
-            Opacity: .5;
-        }
-    }
-
-    width: 160px;
-    height: 48px;
-
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-
-    border-radius: 4px;
-}
-
-#referenceInformation {
-    background-color: #252C45;
-}
-
-} /*header*/
-
-html{
     main{
         padding: 0 40px;
         display: block;
@@ -77,11 +19,11 @@ html{
         display: block;
         align-items: center;
 
-        margin-top: 30px;
+        margin-top: 20px;
         input, select{
             width: 367px;
             height: 40px;
-
+            margin-top: 10px;
             border: 1px solid #B4B4B4;
             border-radius: 4px;
         }

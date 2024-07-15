@@ -13,6 +13,7 @@
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
     {{ form.name }}
+    <br>
     {{ form.password }}
     <p class="error">{{out}}</p>
     <input type="submit" id="save" value="Войти">

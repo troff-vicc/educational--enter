@@ -3,8 +3,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Заявки</title>
-    <link rel="stylesheet" href="{% static 'css/cssTemplatesTable.css' %}">
+    <title>Заявка</title>
+    <link rel="stylesheet" href="{% static 'css/cssTemplatesSearch.css' %}">
 </head>
 <body>
 <header>
@@ -17,7 +17,6 @@
                     12.1046 13.1046 13 12 13H2V15H12V14H14V15C14
                      16.1046 13.1046 17 12 17H2C0.895431 17 0 16.1046
                       0 15V13V2Z" fill="white">
-                
             </path>
             <path fill-rule="evenodd" clip-rule="evenodd" d="M10 6H4V4H10V6Z" fill="white"></path>
             </svg>
@@ -55,23 +54,22 @@
     </div>
 </header>
 <main>
-<form action="{% url 'applicationsListClients' %}"><input type=hidden name=idApplication value=new><button>Добавить</button></form>
-<table>
-    <tr id="headTr"><th>Номер</th><th>ФИО</th><th>Дата</th><th>Статус</th><th>Постоплата</th><th>Признак оплаты</th><th>Число обучаемых</th><th>Автор</th></tr>
-    {% for application in allApplications %}
-        <tr id="{{application.0}}" onclick="window.location.href = `{% url 'applicationsListClients' %}?idApplication={{application.0}}`">
-            <th class="id" name="{{application.0}}">{{application.0}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.2}}</th>
-            <th class="position" name="{{application.0}}">{{application.3}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.4}}</th>
-            <th class="position" name="{{application.0}}">{{application.5}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.6}}</th>
-            <th class="position" name="{{application.0}}">{{application.7}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.8}}</th>
-        </tr>
+    <form method="post">
+      {%csrf_token%}
+      {{ form }}
+      <input type='submit' value="поиск" id="search">
+    </form>
+  {% if listOut %}
+    {% for site in listOut %}
+    <div class="containers1">
+        <a href="{% url 'protocolsClient' %}?id={{ site.0 }}" class="name_title" id="{{site.0}}">{{site.1}}</a>
+        <br>
+        <a href="{% url 'protocolsClient' %}?id={{ site.0 }}" class="name_url">{{site.2}}</a>
+    </div>
     {% endfor %}
-</table>
+  {% else %}
+      <p id="none">По вашему запросу ничего не найдено...</p>
+{% endif %}
 </main>
-<script src="{% static 'js/jsTemplatesTable.js' %}"></script>
 </body>
 </html>

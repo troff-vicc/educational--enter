@@ -10,7 +10,7 @@ class LoginForm(forms.Form):
     
 class UsersAdmin(forms.Form):
     admin = forms.BooleanField(label_suffix=False, label='')
-
+    
 class EmployeesForm(forms.Form):
     fullName = forms.CharField(label='ФИО', max_length=100)
     position = forms.CharField(label='Должность', max_length=100)
@@ -126,6 +126,29 @@ class ApplicationsForm(forms.Form):
             self.initial['idClient'] = my_arg[0]
             self.initial['postpaid'] = my_arg[1]
             self.initial['receiptPayment'] = my_arg[2]
+            
+class ApplicationsFormNoAdmin(forms.Form):
+    import sqlite3
+    conn = sqlite3.connect('educationalDate.db')
+    cur = conn.cursor()
+    boolFields = ((0, 'Нет'), (1, 'Да'))
+    listGroup = cur.execute('select * from clients').fetchall()
+    tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
+    idClient = forms.ChoiceField(label='Клиент', choices = tupleGroup)
+    def __init__(self, *args, **kwargs):
+        t = False
+        if kwargs:
+            t = True
+            my_arg = kwargs.pop('my_arg')
+        super(ApplicationsFormNoAdmin, self).__init__(*args, **kwargs)
+        import sqlite3
+        conn = sqlite3.connect('educationalDate.db')
+        cur = conn.cursor()
+        listGroup = cur.execute('select * from clients').fetchall()
+        tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
+        self.fields['idClient'].choices = tupleGroup
+        if t:
+            self.initial['idClient'] = my_arg[0]
 
 class ClientListForm(forms.Form):
     import sqlite3
@@ -167,6 +190,7 @@ class ProtocolsForm(forms.Form):
     listGroup = cur.execute('select * from studyingPrograms').fetchall()
     tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
     idClient = forms.ChoiceField(label='Программа обучения', choices = tupleGroup)
+    description = forms.CharField(label="Описание", max_length=256)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
@@ -181,6 +205,7 @@ class ProtocolsForm(forms.Form):
         self.fields['idClient'].choices = tupleGroup
         if t:
             self.initial['idClient'] = my_arg[0]
+            self.fields['description'].widget = forms.TextInput(attrs={'value': my_arg[1]})
 
 class ProtocolsClientsForm(forms.Form):
     import sqlite3
@@ -234,3 +259,14 @@ class CompanyForm(forms.Form):
 class ReportsForm(forms.Form):
     dateROt = forms.DateField(label='Дата от', widget=DateInput)
     dateRDo = forms.DateField(label='Дата до', widget=DateInput)
+    
+class SearchProtocols(forms.Form):
+    name = forms.CharField(label='', label_suffix=None, max_length=256)
+    
+    def __init__(self, *args, **kwargs):
+        if kwargs:
+            my_arg = kwargs.pop('my_arg')
+            super(SearchProtocols, self).__init__(*args, **kwargs)
+            self.fields['name'].widget = forms.TextInput(attrs={'value': my_arg})
+        else:
+            super(SearchProtocols, self).__init__(*args, **kwargs)

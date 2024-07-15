@@ -189,7 +189,7 @@ html{
     form{
         display: block;
     }
-    form div:not(#table, #del, #formDiv){
+    form div:not(#table, #del, #formDiv, .container){
         display: flex;
         align-items: center;
 
@@ -232,7 +232,9 @@ html{
         display: flex;
         align-items: center;
 
-        margin-top: 30px;
+        height: 40px;
+
+        margin-top: 20px;
 
         .label{
             width: 120px;
@@ -291,7 +293,7 @@ html{
         }
     }
     #formDiv{
-        height: 115px;
+        height: 40px;
         display: block;
 
         margin-top: 20px;

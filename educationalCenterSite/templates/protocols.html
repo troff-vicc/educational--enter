@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Клиенты</title>
+    <title>Протоколы</title>
      <link rel="stylesheet" href="{% static 'css/cssTemplatesTable.css' %}">
 </head>
 <body>
@@ -56,6 +56,11 @@
 </header>
 <main>
 <form action="{% url 'protocolsClient' %}"><input type=hidden name=id value=new><button>Добавить</button></form>
+    <form method="post">
+      {%csrf_token%}
+      {{form.name}}
+      <input type='submit' value="поиск" id="search">
+    </form>
 <table>
     <tr id="headTr"><th>Номер</th><th>Имя програмы</th><th>Дата</th><th>Количество обучаемых</th><th>Автор</th></tr>
     {% for protocol in allProtocols %}

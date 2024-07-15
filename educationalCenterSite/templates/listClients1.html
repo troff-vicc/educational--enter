@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Протокол</title>
+    <title>Заявка</title>
     <link rel="stylesheet" href="{% static 'css/cssTemplatesClients.css' %}">
 </head>
 <body>
@@ -23,7 +23,7 @@
             <p>Справочная информация</p>
         </a>
     </div>
-    <div class="headEl" id="applications">
+    <div class="headEl" id="applications" name="on">
         <a href="{% url 'applications' %}">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M13 1V4V13H1V4L4 1H13Z" stroke="#FFFFFF" stroke-width="2"></path>
@@ -34,7 +34,7 @@
             <p>Заявки</p>
         </a>
     </div>
-    <div class="headEl" id="protocols" name="on">
+    <div class="headEl" id="protocols">
         <a href="{% url 'protocols' %}">
             <svg width="17" height="12" viewBox="0 0 17 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12.4854 6V2H6.48535V1H1.48535V12" stroke="#FFFFFF" stroke-width="2"></path>
@@ -55,53 +55,57 @@
 </header>
 <!--<form action=""><input type=hidden name=id value={{allApplications.0}}><button>Счёт</button></form>-->
 <main>
-<div id="container3">
-<a href="{% url 'installProtocols' allProtocols.0 %}" download="1" class="score">
+<a href="{% url 'installAccount' allApplications.0 %}" download="1" id="score">
     <svg width="15" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M13.4854 1H1.48535V15.5L4.98535 14L7.48535 16L9.98535 14L13.4854 15.5V1Z" stroke="#303956" stroke-width="2"></path>
     <path d="M3.48535 5H11.4854" stroke="#303956" stroke-width="2"></path>
     <path d="M3.48535 9H11.4854" stroke="#303956" stroke-width="2"></path>
     </svg>
-    <p>Протокол</p>
+    <p>Счёт</p>
 </a>
-<a href="{% url 'installProtocolsXML' allProtocols.0 %}" download="1" class="score">
-    <svg width="15" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M13.4854 1H1.48535V15.5L4.98535 14L7.48535 16L9.98535 14L13.4854 15.5V1Z" stroke="#303956" stroke-width="2"></path>
-    <path d="M3.48535 5H11.4854" stroke="#303956" stroke-width="2"></path>
-    <path d="M3.48535 9H11.4854" stroke="#303956" stroke-width="2"></path>
-    </svg>
-    <p>Выгрузка в XML</p>
-</a>
-</div>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
     <div class="container1">
-        <div class="container" id="number">
-            <p class="label">Номер:</p> 
-            <p class="clientsData">{{allProtocols.0}}</p>
-        </div>
-        <div class="container" id="date">
-            <p class="label">Дата:</p> 
-            <p class="clientsData">{{allProtocols.1}}</p>
+    <div class="container" id="number">
+        <p class="label">Номер:</p>
+        <p class="clientsData">{{allApplications.0}}</p>
+    </div>
+    <div class="container" id="date">
+        <p class="label">Дата:</p>
+        <p class="clientsData">{{allApplications.1}}</p>
+    </div>
+    </div>
+    <div id="formDiv">
+        <div id="idClient">
+            {{ form.idClient.label_tag }}
+            {{ form.idClient }}
         </div>
     </div>
-    {{ form }}
-    <input type=hidden name=action id="action" value="0">
-    <input type="submit" id="fill" value="Заполнить" onclick="fillFunc()">
+    <div class="container1">
+            <div class="container" id="postpaid">
+                <p class="lable">Признак постоплаты:</p>
+                <p class="clientsData">{{allApplications.6}}</p>
+            </div>
+            <div class="container" id="receiptPayment">
+                <p class="lable">Признак поступления оплаты:</p>
+                <p class="clientsData">{{allApplications.7}}</p>
+            </div>
+    </div>
     <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
     <div id="table">
-    <table>
-    <tr id="headTr"><th>Номер</th><th>ФИО</th><th>Клиент</th><th>Снилс</th><th>Результат</th></tr>
-    {% for formC in formsClients %}
-        <tr>
-            <th>{{ formC.prefix }}</th>
-            <th>{{formC.fullName}}</th>
-            <th>{{formC.idClients}}</th>
-            <th>{{formC.snils}}</th>
-            <th>{{formC.result}}</th>
-        </tr>
-    {% endfor %}
-    </table>
+        <table>
+        <tr id="headTr"><th>ФИО</th><th>Должность</th><th>Пол</th><th>СНИЛС</th><th>Возраст</th><th>Программа</th></tr>
+        {% for formC in formsClients %}
+            <tr>
+                <th>{{formC.fullName}}</th>
+                <th>{{formC.post}}</th>
+                <th>{{formC.gender}}</th>
+                <th>{{formC.snils}}</th>
+                <th>{{formC.age}}</th>
+                <th>{{formC.prefStudyingProgram}}</th>
+            </tr>
+        {% endfor %}
+        </table>
         <div id="del">
             {% for formC in formsClients %}
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" 
@@ -118,15 +122,20 @@
     </div>
     <br>
     <input type="submit" id="save" value="Сохранить">
+    <input type=hidden name=action id="action" value="0">
     <div class="container1">
-        <div class="container" id="autor">
-            <p class="label">Автор:</p> 
-            <p class="clientsData">{{allProtocols.3}}</p>
-        </div>
-        <div class="container" id="count">
-            <p class="label">Количество обучаемых:</p>
-            <p class="clientsData">{{allProtocols.2}}</p>
-        </div>
+    <div class="container" id="count">
+        <p class="label">Количество обучаемых:</p>
+        <p class="clientsData">{{allApplications.3}}</p>
+    </div>
+    <div class="container" id="autor">
+        <p class="label">Автор:</p>
+        <p class="clientsData">{{allApplications.4}}</p>
+    </div>
+    <div class="container" id="status">
+        <p class="label">Статус:</p>
+        <p class="clientsData">{{allApplications.2}}</p>
+    </div>
     </div>
 </form>
 </main>
@@ -135,11 +144,6 @@
     function addFunc() {
         const action = document.getElementById("action")
         action.value = "1"
-    }
-
-    function fillFunc(){
-        const action = document.getElementById("action")
-        action.value = "2"
     }
     
     function delFunc(id) {
