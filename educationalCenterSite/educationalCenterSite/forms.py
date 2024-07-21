@@ -1,5 +1,6 @@
 from django import forms
 from formset.widgets import DateInput
+from datetime import date
 class LoginForm(forms.Form):
     name = forms.CharField(label_suffix=False, label='', max_length=50,
                            widget=forms.TextInput(attrs={'placeholder': 'Логин',
@@ -108,8 +109,8 @@ class ApplicationsForm(forms.Form):
     listGroup = cur.execute('select * from clients').fetchall()
     tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
     idClient = forms.ChoiceField(label='Клиент', choices = tupleGroup)
-    postpaid = forms.ChoiceField(label='Признак постоплаты', choices = boolFields)
-    receiptPayment = forms.ChoiceField(label = 'Признак поступления оплаты', choices = boolFields)
+    postpaid = forms.ChoiceField(label='Постоплата', choices = boolFields)
+    receiptPayment = forms.ChoiceField(label = 'Оплачено', choices = boolFields)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
@@ -257,8 +258,8 @@ class CompanyForm(forms.Form):
             super(CompanyForm, self).__init__(*args, **kwargs)
             
 class ReportsForm(forms.Form):
-    dateROt = forms.DateField(label='Дата от', widget=DateInput)
-    dateRDo = forms.DateField(label='Дата до', widget=DateInput)
+    dateROt = forms.DateField(label='Дата от', widget=DateInput, initial=date.today())
+    dateRDo = forms.DateField(label='Дата до', widget=DateInput, initial=date.today())
     
 class SearchProtocols(forms.Form):
     name = forms.CharField(label='', label_suffix=None, max_length=256)

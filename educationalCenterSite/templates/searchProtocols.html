@@ -62,9 +62,9 @@
   {% if listOut %}
     {% for site in listOut %}
     <div class="containers1">
-        <a href="{% url 'protocolsClient' %}?id={{ site.0 }}" class="name_title" id="{{site.0}}">{{site.1}}</a>
+        <a href="{% url 'protocolsClient' %}?id={{ site.0 }}" class="name_title" id="{{site.0}}">{{site.2}}</a>
         <br>
-        <a href="{% url 'protocolsClient' %}?id={{ site.0 }}" class="name_url">{{site.2}}</a>
+        <a href="{% url 'protocolsClient' %}?id={{ site.0 }}" class="name_url">{{site.1}}</a>
     </div>
     {% endfor %}
   {% else %}

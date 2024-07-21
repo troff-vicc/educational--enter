@@ -60,14 +60,14 @@
     <tr id="headTr"><th>Номер</th><th>ФИО</th><th>Дата</th><th>Статус</th><th>Постоплата</th><th>Признак оплаты</th><th>Число обучаемых</th><th>Автор</th></tr>
     {% for application in allApplications %}
         <tr id="{{application.0}}" onclick="window.location.href = `{% url 'applicationsListClients' %}?idApplication={{application.0}}`">
-            <th class="id" name="{{application.0}}">{{application.0}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.2}}</th>
-            <th class="position" name="{{application.0}}">{{application.3}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.4}}</th>
-            <th class="position" name="{{application.0}}">{{application.5}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.6}}</th>
-            <th class="position" name="{{application.0}}">{{application.7}}</th>
-            <th class="fullName" name="{{application.0}}">{{application.8}}</th>
+            <th class="id" >{{application.1}}</th>
+            <th class="fullName">{{application.2}}</th>
+            <th class="position">{{application.3}}</th>
+            <th class="fullName">{{application.4}}</th>
+            <th class="position">{{application.5}}</th>
+            <th class="fullName">{{application.6}}</th>
+            <th class="position">{{application.7}}</th>
+            <th class="fullName">{{application.8}}</th>
         </tr>
     {% endfor %}
 </table>

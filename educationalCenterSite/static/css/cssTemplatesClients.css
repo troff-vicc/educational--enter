@@ -103,12 +103,18 @@ html{
             display: flex;
             flex-flow: row wrap;
             margin-left: 5px;
-            width: 15px;
+            width: 30px;
             margin-top: 46px;
             height: 0;
-            svg{
+            .container4 {
+                display: flex;
+                width: 35px;
                 margin-top: 15px;
                 margin-bottom: 15px;
+                svg{
+                    min-width: 15px;
+                    min-height: 15px;
+                }
             }
         }
         display: flex;
@@ -189,7 +195,7 @@ html{
     form{
         display: block;
     }
-    form div:not(#table, #del, #formDiv, .container){
+    form div:not(#table, #del, #formDiv, .container, .container4){
         display: flex;
         align-items: center;
 
@@ -293,7 +299,7 @@ html{
         }
     }
     #formDiv{
-        height: 40px;
+        height: 130px;
         display: block;
 
         margin-top: 20px;

@@ -15,7 +15,7 @@ def information(request):
         import sqlite3
         con = sqlite3.connect('educationalDate.db')
         cur = con.cursor()
-        isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}")
+        isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}").fetchone()[0]
         if str(isAdmin) == '1':
             return render(request, 'information.html')
         else:
@@ -28,7 +28,7 @@ def users(request):
         import sqlite3
         con = sqlite3.connect('educationalDate.db')
         cur = con.cursor()
-        isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}")
+        isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}").fetchone()[0]
         if str(isAdmin) != '1':
             return HttpResponseRedirect('/information')
     if request.method == 'POST':
@@ -245,7 +245,9 @@ def applicationsList(request):
     allApplications = cur.execute('SELECT * FROM applications').fetchall()
     nList = []
     for i in range(len(allApplications)):
-        nList.append(applicationsTranslate(list(allApplications[i])))
+        listApl = applicationsTranslate(list(allApplications[i]))
+        listApl[1] = listApl[0] + 1
+        nList.append(listApl)
     return render(request, 'applicationsList.html', {'allApplications': nList})
 
 def listClientsNoAdmin(request):
@@ -342,9 +344,12 @@ def listClientsNoAdmin(request):
         elif value == "1":
             for _ in range(6):
                 listData.append(None)
-        else:
+        elif int(value) > 1:
             idDel = int(value) - 3
             listData = listData[:6 * idDel + 3] + listData[6 * (idDel + 1) + 3:]
+        else:
+            idDel = abs(int(value)) - 1
+            listData += listData[6 * idDel + 3:6 * (idDel + 1) + 3]
         if idApplication == -1:
             return retNewRender(listData)
         return retRender(listData)
@@ -382,7 +387,7 @@ def listClients(request):
     con = sqlite3.connect('educationalDate.db')
     cur = con.cursor()
     
-    isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}")
+    isAdmin = cur.execute(f"SELECT admin FROM users WHERE id={request.COOKIES.get('id')}").fetchone()[0]
     if str(isAdmin) != '1':
         return listClientsNoAdmin(request)
     def retRender(date):
@@ -422,7 +427,7 @@ def listClients(request):
         applications = listData[:3]
         value = listData[-1]
         listData = listData[:-1]
-
+    
         if value == "0":
             listData = listData[3:]
             nameClient = cur.execute(f'SELECT name FROM clients where id = {applications[0]}').fetchone()[0]
@@ -466,9 +471,12 @@ def listClients(request):
         elif value == "1":
             for _ in range(6):
                 listData.append(None)
-        else:
-            idDel = int(value)-3
+        elif int(value) > 1:
+            idDel = int(value) - 3
             listData = listData[:6*idDel+3] + listData[6*(idDel+1)+3:]
+        else:
+            idDel = abs(int(value)) - 1
+            listData += listData[6 * idDel + 3:6 * (idDel + 1) + 3]
         if idApplication == -1:
             return retNewRender(listData)
         return retRender(listData)
@@ -980,12 +988,15 @@ def protocolsSearch(request):
         allListData = []
         for oneHuman in protocolsClientsAll:
             nameClient = cur.execute(f'SELECT name FROM clients WHERE id={oneHuman[2]}').fetchone()
-            allListData.append([oneHuman[0]] + list(map(lambda x: x.lower(), oneHuman[1].split())) + list(nameClient))
+            allListData.append([oneHuman[0]] + list(map(lambda x: x.lower(), list(nameClient))) +
+                               list(map(lambda x: x.lower(), oneHuman[1].split())))
         listOut = []
         for allData in range(len(allListData)):
-            print(allListData[allData])
             for w in allListData[allData][1:]:
                 if listData == w[:len(listData)]:
+                    name = ' '.join(allListData[allData][2:])
+                    allListData[allData] = allListData[allData][:2]
+                    allListData[allData].append(name)
                     listOut.append(allListData[allData])
                     break
         listOut = list(listOut)
