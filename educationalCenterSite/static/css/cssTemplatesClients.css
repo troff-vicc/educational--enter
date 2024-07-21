@@ -102,20 +102,20 @@ html{
         #del{
             display: flex;
             flex-flow: row wrap;
-            margin-left: 5px;
+            height: 0;
             width: 30px;
             margin-top: 46px;
-            height: 0;
             .container4 {
                 display: flex;
-                width: 35px;
-                margin-top: 15px;
-                margin-bottom: 15px;
-                svg{
+            }
+            svg{
+                    margin-top: 15px;
+                    margin-bottom: 15px;
                     min-width: 15px;
                     min-height: 15px;
+                    margin-left: 5px;
+
                 }
-            }
         }
         display: flex;
         margin-top: 4px;
