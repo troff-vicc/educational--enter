@@ -75,6 +75,7 @@
 </div>
 <form method="post" id="inputForm" novalidate>
     {% csrf_token %}
+    <input type=hidden name=action id="action" value="0">
     <div class="container1">
         <div class="container" id="number">
             <p class="label">Номер:</p> 
@@ -93,7 +94,6 @@
         {{ form.description.label_tag }}
         {{ form.description }}
     </div>
-    <input type=hidden name=action id="action" value="0">
     <input type="submit" id="fill" value="Заполнить" onclick="fillFunc()">
     <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
     <div id="table">

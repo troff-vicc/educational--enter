@@ -721,14 +721,15 @@ def protocolsClients(request):
     cur = con.cursor()
     idProtocols = -1 if z == "new" else int(z)
     def retRender(data):
-        form1 = ProtocolsForm(my_arg=data[:1])
-        listClient1 = data[1:]
+        form1 = ProtocolsForm(my_arg=data[:2])
+        listClient1 = data[2:]
         formsClients = []
         for j in range(len(listClient1)//4):
             formsClients.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
         allProtocol = list(cur.execute(f'SELECT * FROM protocols where id = {idProtocols}').fetchone())
         allProtocol[5] = cur.execute(f'select name from users where id = {allProtocol[5]}').fetchone()[0]
         allProtocol = [allProtocol[0]] + allProtocol[3:]
+        con.commit()
         return render(request, 'protocolsClients.html',
                       {'form': form1, 'formsClients': formsClients, 'allProtocols': allProtocol})
     def retNewRender(data):
@@ -745,6 +746,7 @@ def protocolsClients(request):
         formsClients1 = []
         for j in range(len(listClient1)//4):
             formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
+        con.commit()
         return render(request, 'protocolsClients.html',
                       {'form': form1, 'formsClients': formsClients1,
                        'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'),
@@ -757,8 +759,8 @@ def protocolsClients(request):
         return listData1
     if request.method == 'POST':
         listData = list(request.POST.values())[1:]
-        value = listData[-1]
-        listData = listData[:-1]
+        value = str(listData[0])
+        listData = listData[1:]
         protocol = [listData[0]]
         if value == "0":
             nameClient = cur.execute(f'SELECT name, textForReport FROM studyingPrograms where id = {protocol[0]}').fetchone()
@@ -798,9 +800,8 @@ def protocolsClients(request):
                     listValue = listData[i * 4:(i + 1) * 4]
                     idr = cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
                     idTrainee = int(idr if isinstance(idr, int) else -1) + 1
-                    
                     cur.execute(f'INSERT INTO protocolsClients values'+
-                    f"({idTrainee}, {idProtocols}, '{listValue[0]}', {listValue[1]}, '{listValue[2]}',"
+                    f"({idTrainee}, {idProtocols}, '{listValue[0]}', '{listValue[1]}', '{listValue[2]}',"
                     f" '{listValue[3]}', NULL)")
                     countTrainee += 1
                 cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
@@ -833,7 +834,6 @@ def protocolsClients(request):
         else:
             idDel = int(value)-3
             listData = listData[:4*idDel+1] + listData[4*(idDel+1)+1:]
-        con.commit()
         if idProtocols == -1:
             return retNewRender(listData)
         return retRender(listData)
