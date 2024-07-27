@@ -192,6 +192,7 @@ class ProtocolsForm(forms.Form):
     tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
     idClient = forms.ChoiceField(label='Программа обучения', choices = tupleGroup)
     description = forms.CharField(label="Описание", max_length=256)
+    idProtocolsClient = forms.CharField(label="ID обучаемых", max_length=256)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
@@ -207,6 +208,7 @@ class ProtocolsForm(forms.Form):
         if t:
             self.initial['idClient'] = my_arg[0]
             self.fields['description'].widget = forms.TextInput(attrs={'value': my_arg[1]})
+            self.fields['idProtocolsClient'].widget = forms.TextInput(attrs={'value': my_arg[2]})
 
 class ProtocolsClientsForm(forms.Form):
     import sqlite3

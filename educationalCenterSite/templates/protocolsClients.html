@@ -94,14 +94,17 @@
         {{ form.description.label_tag }}
         {{ form.description }}
     </div>
+    <div>
+        {{ form.idProtocolsClient.label_tag }}
+        {{ form.idProtocolsClient }}
+    </div>
     <input type="submit" id="fill" value="Заполнить" onclick="fillFunc()">
     <button id="add" onclick="addFunc();"><span id="addSymbol"></span></button>
     <div id="table">
     <table>
-    <tr id="headTr"><th>Номер</th><th>ФИО</th><th>Клиент</th><th>Снилс</th><th>Результат</th></tr>
+    <tr id="headTr"><th>ФИО</th><th>Клиент</th><th>Снилс</th><th>Результат</th></tr>
     {% for formC in formsClients %}
         <tr>
-            <th>{{ formC.prefix }}</th>
             <th>{{formC.fullName}}</th>
             <th>{{formC.idClients}}</th>
             <th>{{formC.snils}}</th>

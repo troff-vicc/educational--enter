@@ -592,6 +592,7 @@ def installProtocols(request, id):
     h.bold = True
     h.alignment = 0
     doc.add_paragraph(program[6])
+    doc.add_paragraph(protocol[6])
     #table
     listN = ['ФИО', 'Клиент', 'СНИЛС', 'Номер реестра',
              'Результат проведения', 'Подпись']
@@ -610,7 +611,7 @@ def installProtocols(request, id):
     for client in range(len(protocolClients)):
         for col in range(len(listCol)+1):
             if col == len(listCol):
-                table.cell(client + 1, 0).text = str(protocolClients[client][0])
+                table.cell(client + 1, 0).text = protocol[7] + f'{(protocolClients[client][0]+1):02d}'
             elif listCol[col] == 'ФИО':
                 table.cell(client + 1, col+1).text = str(protocolClients[client][2])
             elif listCol[col] == 'Клиент':
@@ -721,8 +722,8 @@ def protocolsClients(request):
     cur = con.cursor()
     idProtocols = -1 if z == "new" else int(z)
     def retRender(data):
-        form1 = ProtocolsForm(my_arg=data[:2])
-        listClient1 = data[2:]
+        form1 = ProtocolsForm(my_arg=data[:3])
+        listClient1 = data[3:]
         formsClients = []
         for j in range(len(listClient1)//4):
             formsClients.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
@@ -741,7 +742,7 @@ def protocolsClients(request):
             return render(request, 'protocolsClients.html',
                           {'form': form1, 'formsClients': [],
                            'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
-        form1 = ProtocolsForm(my_arg=data[:1])
+        form1 = ProtocolsForm(my_arg=data[:3])
         listClient1 = data[1:]
         formsClients1 = []
         for j in range(len(listClient1)//4):
@@ -768,14 +769,18 @@ def protocolsClients(request):
             des = listData[1]
             if listData[1] == '':
                 des = nameClient[1]
+            idProtocolsClient = listData[2]
             protocol.append(des)
+            protocol.append(idProtocolsClient)
             if idProtocols == -1:
                 idProtocols = len(cur.execute(f"SELECT * FROM protocols").fetchall())
                 listData1 = tuple(
-                    protocolsTranslate(([idProtocols] + listData[:1]), request.COOKIES.get('id')))
-                cur.execute(f'''INSERT INTO protocols VALUES(?,?,?,?,?,?)''', listData1)
+                    protocolsTranslate(([idProtocols] + listData[:1]), request.COOKIES.get('id'))+
+                    listData[1:3]
+                )
+                cur.execute(f'''INSERT INTO protocols VALUES(?,?,?,?,?,?,?,?)''', listData1)
                 countTrainee = 0
-                listData = listData[1:]
+                listData = listData[3:]
                 for i in range(len(listData) // 4):
                     listValue = listData[i * 4:(i + 1) * 4]
                     idr = \
@@ -788,14 +793,15 @@ def protocolsClients(request):
                 cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
             else:
                 cur.execute(
-                    f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ?, description = ?'
+                    f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ?,'
+                    f' description = ?, idProtocolsClient = ?'
                     f' where id = {idProtocols}',
                     tuple(protocol)
                 )
                 
                 cur.execute(f"DELETE FROM protocolsClients WHERE idProtocols={idProtocols}")
                 countTrainee = 0
-                listData = listData[2:]
+                listData = listData[3:]
                 for i in range(len(listData) // 4):
                     listValue = listData[i * 4:(i + 1) * 4]
                     idr = cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
@@ -828,7 +834,7 @@ def protocolsClients(request):
                     if tf:
                         listData1 = addLine(listData1)
             if listData1:
-                listData = listData[:1]
+                listData = listData[:3]
                 for el in listData1:
                     listData.append(el)
         else:
@@ -842,7 +848,7 @@ def protocolsClients(request):
             return retNewRender([])
         allProtocols = list(cur.execute(f"SELECT * FROM protocols where id = '{idProtocols}'").fetchone())
         allProtocols[5] = cur.execute(f"select name from users where id = '{allProtocols[5]}'").fetchone()[0]
-        allApplicationsForm = [allProtocols[1]]+[allProtocols[6]]
+        allApplicationsForm = [allProtocols[1]]+allProtocols[6:]
         allProtocols = [allProtocols[0]] + allProtocols[3:]
         form = ProtocolsForm(my_arg=allApplicationsForm)
         listClient = list(cur.execute(f'SELECT * FROM protocolsClients where idProtocols = {allProtocols[0]}').fetchall())
