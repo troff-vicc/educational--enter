@@ -138,7 +138,7 @@ html{
             Opacity: .5;
         }
     }
-    #fill{
+    #fill, #ButtonIdProtocolsClient{
         width: 102px;
         height: 36px;
 
@@ -195,7 +195,8 @@ html{
     form{
         display: block;
     }
-    form div:not(#table, #del, #formDiv, .container, .container4){
+    form div:not(#table, #del, #formDiv, .container,
+     .container4, #idProtocolsClient, #ButtonIdProtocolsClient){
         display: flex;
         align-items: center;
 
@@ -234,6 +235,21 @@ html{
             border-radius: 4px;
         }
         }
+    #idProtocolsClient{
+        display: none;
+        margin-top: 10px;
+        height: 40px;
+        input{
+            padding: 0 15px;
+
+            margin-left: 20px;
+            width: 367px;
+            height: 40px;
+
+            border: 1px solid #B4B4B4;
+            border-radius: 4px;
+        }
+    }
     .container{
         display: flex;
         align-items: center;

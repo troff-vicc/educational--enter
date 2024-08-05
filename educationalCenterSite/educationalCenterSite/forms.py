@@ -208,7 +208,6 @@ class ProtocolsForm(forms.Form):
         if t:
             self.initial['idClient'] = my_arg[0]
             self.fields['description'].widget = forms.TextInput(attrs={'value': my_arg[1]})
-            self.fields['idProtocolsClient'].widget = forms.TextInput(attrs={'value': my_arg[2]})
 
 class ProtocolsClientsForm(forms.Form):
     import sqlite3
@@ -221,6 +220,7 @@ class ProtocolsClientsForm(forms.Form):
     idClients = forms.ChoiceField(label='Клиент', choices=tupleGroup)
     snils = forms.IntegerField(label='Снилс')
     result = forms.ChoiceField(label='Результат', choices=resulChoose)
+    idProtocolClientOne = forms.CharField(label="ID обучаемых", max_length=256)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
@@ -234,10 +234,11 @@ class ProtocolsClientsForm(forms.Form):
         tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
         self.fields['idClients'].choices = tupleGroup
         if t:
-            self.fields['fullName'].widget = forms.TextInput(attrs={'value': my_arg[0]})
-            self.initial['idClients'] = my_arg[1]
-            self.fields['snils'].widget = forms.NumberInput(attrs={'value': my_arg[2]})
-            self.initial['result'] = my_arg[3]
+            self.fields['fullName'].widget = forms.TextInput(attrs={'value': my_arg[1]})
+            self.initial['idClients'] = my_arg[2]
+            self.fields['snils'].widget = forms.NumberInput(attrs={'value': my_arg[3]})
+            self.initial['result'] = my_arg[4]
+            self.fields['idProtocolClientOne'].widget = forms.TextInput(attrs={'value': my_arg[0]})
             
 class CompanyForm(forms.Form):
     name = forms.CharField(label='Наименование', max_length=256)

@@ -725,8 +725,8 @@ def protocolsClients(request):
         form1 = ProtocolsForm(my_arg=data[:3])
         listClient1 = data[3:]
         formsClients = []
-        for j in range(len(listClient1)//4):
-            formsClients.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
+        for j in range(len(listClient1)//5):
+            formsClients.append(ProtocolsClientsForm(my_arg=listClient1[j * 5:(j + 1) * 5], prefix=j))
         allProtocol = list(cur.execute(f'SELECT * FROM protocols where id = {idProtocols}').fetchone())
         allProtocol[5] = cur.execute(f'select name from users where id = {allProtocol[5]}').fetchone()[0]
         allProtocol = [allProtocol[0]] + allProtocol[3:]
@@ -743,10 +743,10 @@ def protocolsClients(request):
                           {'form': form1, 'formsClients': [],
                            'allProtocols': [id, datetime.datetime.now(settings.TIME_DELTA).strftime('%d.%m.%Y %X'), request.COOKIES.get('id'), 0]})
         form1 = ProtocolsForm(my_arg=data[:3])
-        listClient1 = data[1:]
+        listClient1 = data[3:]
         formsClients1 = []
         for j in range(len(listClient1)//4):
-            formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 4:(j + 1) * 4], prefix=j))
+            formsClients1.append(ProtocolsClientsForm(my_arg=listClient1[j * 5:(j + 1) * 5], prefix=j))
         con.commit()
         return render(request, 'protocolsClients.html',
                       {'form': form1, 'formsClients': formsClients1,
@@ -769,32 +769,31 @@ def protocolsClients(request):
             des = listData[1]
             if listData[1] == '':
                 des = nameClient[1]
-            idProtocolsClient = listData[2]
             protocol.append(des)
-            protocol.append(idProtocolsClient)
             if idProtocols == -1:
                 idProtocols = len(cur.execute(f"SELECT * FROM protocols").fetchall())
                 listData1 = tuple(
                     protocolsTranslate(([idProtocols] + listData[:1]), request.COOKIES.get('id'))+
-                    listData[1:3]
+                    [listData[1]]
                 )
-                cur.execute(f'''INSERT INTO protocols VALUES(?,?,?,?,?,?,?,?)''', listData1)
+                cur.execute(f'''INSERT INTO protocols VALUES(?,?,?,?,?,?,?)''', listData1)
                 countTrainee = 0
                 listData = listData[3:]
-                for i in range(len(listData) // 4):
-                    listValue = listData[i * 4:(i + 1) * 4]
+                for i in range(len(listData) // 5):
+                    listValue = listData[i * 5:(i + 1) * 5]
                     idr = \
                     cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
                     idTrainee = int(idr if isinstance(idr, int) else -1) + 1
                     
                     cur.execute(f'INSERT INTO protocolsClients values' +
-                                f"({idTrainee}, {idProtocols}, '{listValue[0]}', {listValue[1]}, '{listValue[2]}', '{listValue[3]}', NULL)")
+                                f"({idTrainee}, {idProtocols}, '{listValue[1]}', {listValue[2]}, '{listValue[3]}',"
+                                f" '{listValue[4]}', NULL, '{listValue[0]}')")
                     countTrainee += 1
                 cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
             else:
                 cur.execute(
                     f'update protocols set idStudyingProgram = ?, nameStudyingProgram = ?,'
-                    f' description = ?, idProtocolsClient = ?'
+                    f' description = ?'
                     f' where id = {idProtocols}',
                     tuple(protocol)
                 )
@@ -802,19 +801,19 @@ def protocolsClients(request):
                 cur.execute(f"DELETE FROM protocolsClients WHERE idProtocols={idProtocols}")
                 countTrainee = 0
                 listData = listData[3:]
-                for i in range(len(listData) // 4):
-                    listValue = listData[i * 4:(i + 1) * 4]
+                for i in range(len(listData) // 5):
+                    listValue = listData[i * 5:(i + 1) * 5]
                     idr = cur.execute(f'SELECT MAX(id) FROM protocolsClients WHERE idProtocols = {idProtocols}').fetchone()[0]
                     idTrainee = int(idr if isinstance(idr, int) else -1) + 1
-                    cur.execute(f'INSERT INTO protocolsClients values'+
-                    f"({idTrainee}, {idProtocols}, '{listValue[0]}', '{listValue[1]}', '{listValue[2]}',"
-                    f" '{listValue[3]}', NULL)")
+                    cur.execute(f"INSERT INTO protocolsClients values({idTrainee}, {idProtocols},"
+                                f" '{listValue[1]}', '{listValue[2]}', '{listValue[3]}', '{listValue[4]}',"
+                                f" NULL, '{listValue[0]}')")
                     countTrainee += 1
                 cur.execute(f"update protocols set countTrainee = {countTrainee} WHERE id = {idProtocols}")
             con.commit()
             return HttpResponseRedirect(f'/protocols/clients?id={idProtocols}')
         elif value == "1":
-            for _ in range(4):
+            for _ in range(5):
                 listData.append(None)
         elif value == "2":
             idStudyingProgram = protocol[0]
@@ -837,9 +836,16 @@ def protocolsClients(request):
                 listData = listData[:3]
                 for el in listData1:
                     listData.append(el)
+        elif value == "3":
+            listData1 = listData[3:]
+            for i in range(len(listData1) // 5):
+                listValue2 = listData1[i * 5:(i + 1) * 5]
+                listValue2[0] = f"{listData[2]}{i+1:02d}"
+                listData1[i * 5:(i + 1) * 5] = listValue2
+            listData = listData[:3] + listData1
         else:
-            idDel = int(value)-3
-            listData = listData[:4*idDel+1] + listData[4*(idDel+1)+1:]
+            idDel = int(value)-4
+            listData = listData[:5*idDel+1] + listData[5*(idDel+1)+1:]
         if idProtocols == -1:
             return retNewRender(listData)
         return retRender(listData)
@@ -854,7 +860,8 @@ def protocolsClients(request):
         listClient = list(cur.execute(f'SELECT * FROM protocolsClients where idProtocols = {allProtocols[0]}').fetchall())
         formsClients = []
         for i in range(len(listClient)):
-            formsClients.append(ProtocolsClientsForm(my_arg=listClient[i][2:], prefix=i))
+            valueList = [listClient[i][7]] + list(listClient[i][2:7])
+            formsClients.append(ProtocolsClientsForm(my_arg=valueList, prefix=i))
         return render(request, 'protocolsClients.html',
                       {'form': form, 'formsClients': formsClients, 'allProtocols': allProtocols})
 
@@ -1003,7 +1010,10 @@ def protocolsSearch(request):
                     name = ' '.join(allListData[allData][2:])
                     allListData[allData] = allListData[allData][:2]
                     allListData[allData].append(name)
+                    dateProtocol = cur.execute(f"SELECT date FROM protocols WHERE id={allListData[allData][0]}").fetchone()[0]
+                    allListData[allData].append(dateProtocol)
                     listOut.append(allListData[allData])
                     break
         listOut = list(listOut)
-        return render(request, 'searchProtocols.html', {'form': form, 'listOut': listOut})
+        return render(request, 'searchProtocols.html',
+                      {'form': form, 'listOut': listOut})
