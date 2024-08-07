@@ -238,6 +238,7 @@ html{
     #idProtocolsClient{
         display: none;
         margin-top: 10px;
+        margin-left: 10px;
         height: 40px;
         input{
             padding: 0 15px;

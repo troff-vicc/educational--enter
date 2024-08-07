@@ -611,7 +611,7 @@ def installProtocols(request, id):
     for client in range(len(protocolClients)):
         for col in range(len(listCol)+1):
             if col == len(listCol):
-                table.cell(client + 1, 0).text = protocol[7] + f'{(protocolClients[client][0]+1):02d}'
+                table.cell(client + 1, 0).text = f'{(protocolClients[client][7])}'
             elif listCol[col] == 'ФИО':
                 table.cell(client + 1, col+1).text = str(protocolClients[client][2])
             elif listCol[col] == 'Клиент':

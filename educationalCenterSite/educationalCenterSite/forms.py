@@ -192,7 +192,7 @@ class ProtocolsForm(forms.Form):
     tupleGroup = tuple([(i[0], i[1]) for i in listGroup])
     idClient = forms.ChoiceField(label='Программа обучения', choices = tupleGroup)
     description = forms.CharField(label="Описание", max_length=256)
-    idProtocolsClient = forms.CharField(label="ID обучаемых", max_length=256)
+    idProtocolsClient = forms.CharField(label="Префикс обучаемых", max_length=256)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
@@ -220,7 +220,7 @@ class ProtocolsClientsForm(forms.Form):
     idClients = forms.ChoiceField(label='Клиент', choices=tupleGroup)
     snils = forms.IntegerField(label='Снилс')
     result = forms.ChoiceField(label='Результат', choices=resulChoose)
-    idProtocolClientOne = forms.CharField(label="ID обучаемых", max_length=256)
+    idProtocolClientOne = forms.CharField(label="Префикс обучаемых", max_length=256)
     def __init__(self, *args, **kwargs):
         t = False
         if kwargs:
